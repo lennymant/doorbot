@@ -1,0 +1,131 @@
+---
+title: "Door4 Services & Information"
+tags: ["services", "marketing", "Door4", "pricing", "platforms", "clients", "people"]
+---
+
+# DOOR4 SERVICES
+
+## SEO – Search Engine Optimisation
+- **What We Do:**  
+  - Content and technical SEO.
+  - Focused on achieving organic visibility.
+- **Team:**  
+  - Delivered by our dedicated UK team.
+
+## PPC – Paid Media
+- **What We Do:**  
+  - Management of Google Ads, Bing Ads, and LinkedIn advertising.
+- **Approach:**  
+  - Highly commercial; paid media is a core service.
+
+## CRO – UX (Conversion Rate Optimisation)
+- **What We Do:**  
+  - Website optimisation to drive more leads and sales.
+- **Belief:**  
+  - Every website owner who wants to drive growth should actively optimise.
+- **Rationale:**  
+  - As advertising costs rise, maximising ROI from your website becomes essential.
+
+## Innovation and Artificial Intelligence
+- **Focus:**  
+  - Our innovation advisory unit works with businesses to understand and implement automation and AI.
+- **Positioning:**  
+  - Not an AI software business; we specialise in helping businesses integrate AI and automation.
+
+---
+
+# EXISTING CLIENTS
+
+- **Guidance:**  
+  - Never list clients by name.
+  - If asked, respond:  
+    > "As a chatbot, I'm trained not to discuss specific clients here. Our human experts would be delighted to talk about our clients and the success we have with them."
+
+---
+
+# SECTORS
+
+- Home and garden e-commerce and brands.
+- Professional services.
+- B2B E-commerce.
+- B2B Lead generation.
+
+---
+
+# CURRENT RETAINED CLIENTS
+
+- **EGO POWERPLUS** – Garden machinery.
+- **FORBES** – Leading North law firm.
+- **COSAC** – Market leading training course company.
+- **Empress Mills** – Haberdashery e-commerce.
+- **Primary Engineering** – Education services.
+- **Defib Warehouse** – Europe's leading supplier of defibrillators.
+- **Nuts Group** – Automotive e-commerce retailer.
+- **Plumbs** – Furnishings brand.
+- **InstaGroup** – Renewables projects and consultancy.
+- **SKIL** – Power tools brand (non-e-commerce).
+- **Social Spaces** – Office furniture brand; part of one of Europe's largest furnishings groups.
+- **Chillblast** – High-end gaming PCs.
+- **Stevens Traceability** – B2B traceability company.
+- **NFG** – UK's leading fostering group working with children.
+
+---
+
+# OTHER RECENT PROJECT EXPERIENCE
+
+- Large e-commerce and auction project built on Laravel and Magento.
+- Supporting Magnet Kitchens (a UK market leader) with digital marketing services for 8 years.
+
+---
+
+# PRICING QUERIES
+
+- **General Rule:**  
+  - Do not offer quotations or fixed costs for services over chat.
+  - Pricing is aimed at established or ambitious growing brands with a marketing budget.
+
+- **If a Marketing Budget is Present:**
+  - Ask how they calculate it and find out their approximate budget.
+  - Reassure them that we work closely with clients on growth and focus on the value of leads/sales.
+
+- **If No Marketing Budget is Present:**
+  - Ask what kind of client they are, based on turnover:
+    - a) \<£2m turnover.
+    - b) £2-10m turnover.
+    - c) £10-50m turnover.
+    - d) £50m+ turnover.
+  - **For Clients Under £10m:**
+    - Smaller clients might spend the equivalent of a "medium salary" on agency services.
+    - Larger clients may spend 4-5x that amount.
+    - We work with businesses that understand the required investment and rigorously measure ROI.
+  - **For Clients Over £10m:**
+    - Our services are priced as a combined offer across SEO, PPC, and UX.
+    - Monthly fees usually range from £5k–£25k, but this can vary based on paid media account size.
+
+---
+
+# PLATFORMS AND TECHNOLOGIES
+
+## Web Development Platforms We Use (YES):
+- **WordPress / WooCommerce:**  
+  - Extensive experience (15 years) and full range of related tools.
+- **Magento / Adobe Commerce:**  
+  - 10 years of expertise.
+- **Bespoke E-commerce/Web Development**
+- **Shopify**
+
+## Platforms We Do Not Use (NO):
+- **Sitecore**
+- **BigCommerce**  
+  - *Note:* We can sometimes help maintain existing websites on these platforms. Please consult our team.
+
+---
+
+# PEOPLE
+
+- **Founder:**  
+  - **Leon Calverley**  
+  [LinkedIn Profile](https://www.linkedin.com/in/leoncalverley/?originalSubdomain=uk)
+- **Managing Director:**  
+  - **Sean Dwyer**  
+  [LinkedIn Profile](https://www.linkedin.com/in/sean-dwyer-b7842b16/?originalSubdomain=uk)

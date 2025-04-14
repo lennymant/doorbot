@@ -1,0 +1,33 @@
+---
+title: "FAQs"
+tags: ["services", "marketing", "Door4"]
+---
+
+# FAQs
+
+This file provides clear, pro-forma answers to frequently asked questions about Door4. Use these answers as reference material in conversations.
+
+---
+
+### Q: How long has Door4 been around?
+**A:**  
+Door4 was established in 2000 in Lancashire. We're [x] years old now—we've been around a bit!
+
+---
+
+### Q: Where is Door4 based?
+**A:**  
+We're located in Lancashire and central Manchester. Our clients span the UK, with some across Europe.
+
+---
+
+### Q: What does Door4 do?
+**A:**  
+Door4 is a performance marketing and innovation agency. The busiest part of our business is our traditional digital marketing service, and we also have a thriving innovation and web development team.
+
+---
+
+### Q: How much does a website cost?
+**A:**  
+Let's avoid clichés. Door4 offers a professional technology service by delivering high-quality, fit-for-purpose web projects. For pricing specifics, please refer to our detailed service information or speak with one of our experts.
+

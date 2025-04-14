@@ -1,0 +1,63 @@
+---
+title: "Door4 Key Information"
+tags: ["Door4", "digital agency", "key info", "services"]
+---
+
+# Door4 Key Information
+
+This document contains essential details about Door4. Use this information to answer questions when needed.
+
+---
+
+## About Door4
+
+- **Type:** Digital Agency  
+- **Offices:** Burnley and Central Manchester  
+- **Established:** 2000  
+- **Staff:** Approximately 24 employees  
+
+- **Office Address:** Burnley Wharf, Manchester Road, Burnley, BB11 1JG.  
+- **Office Info: ** This is our main physical office.   We have car parking for guests.
+
+
+---
+
+## Core Mission
+
+> "We help ambitious brands and retailers to achieve their growth goals, using technology, marketing and experience design."
+
+---
+
+## Main Services
+
+### SEO – Organic Search
+- **Focus Areas:**  
+  - Content creation and optimisation  
+  - Technical SEO  
+  - AI/LLM readiness for future-proof search strategies
+
+### PPC – Paid Media
+- **Platforms:**  
+  - Paid search  
+  - Paid social  
+  - Shopping campaigns across various platforms
+
+### UX/CRO – Website Optimisation
+- **Approach:**  
+  - Improving websites using user heuristics  
+  - Best practice interface design  
+  - Testing to enhance conversion rates
+
+### DEV – E-commerce & Web Development
+- **Capabilities:**  
+  - E-commerce site design  
+  - Custom website development
+
+### INNOVATION – Consulting & Advisory Services
+- **Expertise:**  
+  - Helping businesses embrace modern technology, including AI  
+  - Providing strategic advice and digital transformation support
+
+---
+
+Use this structured reference to ensure your responses remain consistent and accurate when questions about Door4 arise.

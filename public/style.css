@@ -1,0 +1,159 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  #chatBox {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .user {
+    align-self: flex-end;
+    background-color: #0077cc;
+    color: white;
+    border-bottom-right-radius: 0;
+  }
+    
+  .bot {
+    align-self: flex-start;
+    background-color: #e5e7eb;
+    color: #111;
+    border-bottom-left-radius: 0;
+  }
+  
+  .message {
+    max-width: 70%;
+    padding: 10px 14px;
+    margin: 5px 0;
+    border-radius: 16px;
+    line-height: 1.4em;
+    display: inline-block;
+  }
+  
+
+  .bot-option {
+    margin-right: 8px;
+    margin-top: 8px;
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: none;
+    background-color: #0077cc;  /* Door4 blue */
+    color: #555;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: inline-block;
+  }
+  
+  .bot-option:hover {
+    background-color: #005fa3;
+  }
+    
+  
+  #inputArea {
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+  }
+  
+  #userInput {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #005fa3;
+  }
+  
+
+  .bot-option {
+  margin-right: 8px;
+  margin-top: 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #fff;
+  font-size: 14px;
+}
+
+.bot-option:hover {
+  background: #f0f0f0;
+}
+.typing-indicator {
+  text-align: left;
+  margin: 10px 20px;
+  font-style: italic;
+  font-size: 14px;
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.typing-indicator.visible {
+  opacity: 1;
+}
+
+.typing-indicator.hidden {
+  opacity: 0;
+}
+
+.typing-dots span {
+  animation: blink 1.2s infinite;
+  opacity: 0;
+}
+
+.typing-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+.test-banner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid #ffeeba;
+}
+
+.test-banner.hidden {
+  display: none;
+}

@@ -1,0 +1,16 @@
+{
+    "appointment": {
+      "prompt": "Would you like to book a call with one of our experts?",
+      "confirmation": "Great, I'll need some details to schedule your call."
+    }
+  }
+
+  
+  {
+    "callback": {
+      "prompt": "Would you like a callback from one of our team?",
+      "confirmation": "Great, I'll need the best number to get you on and the best time to contact you."
+    }
+  }
+  
+  

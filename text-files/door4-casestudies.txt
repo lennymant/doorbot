@@ -1,0 +1,134 @@
+---
+title: "Door4 Case Studies"
+tags: ["case study", "Door4", "digital marketing", "SEO", "web development"]
+---
+
+# Door4 Case Studies
+
+This document compiles case studies for Nuts Group, Plumbs, and National Fostering Group. Each section highlights the challenges, approach, and results achieved through Door4's strategic initiatives.
+
+---
+
+## Nuts Group Case Study
+*Sector: Automotive E-commerce*  
+*Tackling Rising CPCs through a Collaborative Digital Approach*
+
+### Key Metrics
+- **83%** growth in organic traffic.
+- **68%** increase in revenue.
+
+### The Challenge
+Nuts Group faced rising digital advertising costs on platforms like Google and Meta, combined with intense competition in organic search. Their objectives were to:
+- Increase revenue and maintain profitability.
+- Drive higher Average Order Values (AOVs) while growing organic traffic.
+
+**Obstacles:**
+- Escalating CPCs.
+- Website limitations.
+- Sustaining a competitive edge in both paid media and SEO.
+
+### The Approach
+A refined strategy was developed using insights from SEMrush, Google Ads, and Google Search Console. Key elements included:
+- **Technical Audit:** Comprehensive audit to identify issues (crawlability, indexing).
+- **Team Collaboration:** Close work between PPC, SEO, and CRO teams.
+- **Strategic Initiatives:**
+  - *Pricing Strategy:* Enhance pricing elasticity and promote bundle offers.
+  - *Organic Growth:* Target long-tail keywords to boost visibility.
+  - *Diversified Paid Media:* Expand brand awareness via social channels.
+- **Data & Privacy Focus:** Integration of GDPR-compliant strategies (e.g., Consent Mode 2.0) and advanced tracking.
+
+### The Execution
+Door4 implemented the strategy in phases:
+1. **Stakeholder Engagement:** Regular client collaboration.
+2. **Technical & Content Audit:** Uncovered website issues and provided recommendations.
+3. **Multi-Channel Marketing:** Diversified paid media strategy across multiple platforms.
+4. **Optimisation & Collaboration:** Refinement of ad copy, site design, and promotion of bundle sales.
+5. **Future-Proofing:** Plans for server-side tracking and channel expansion.
+
+### The Results
+- **68%** revenue growth over four years.
+- **80%** increase in organic traffic.
+- **33%** year-on-year AOV growth.
+- **83%** revenue increase from organic search.
+
+### The Conclusion
+By refining pricing strategies, expanding organic traffic, and enhancing social media presence, Nuts Group achieved sustained revenue growth and long-term profitability. Door4’s data-driven approach underscores the power of technical innovation and strategic marketing collaboration.
+
+---
+
+## Plumbs Case Study
+*Sector: Home Furnishings (Home and Garden)*  
+*Strategic Budget Reallocation Leads to Long-Term Gains for Plumbs*
+
+### Overview
+Plumbs required a digital transformation to enhance website functionality and development potential despite short-term performance risks. In 2024, Door4 executed a major re-platforming project to address these needs.
+
+### Client Objectives
+- Improve website functionality and ease of future development.
+- Achieve long-term gains despite potential short-term dips.
+- Enhance internal processes and the customer journey through better platform flexibility.
+
+### Our Solution
+- **Re-platforming:** Moved the website from Laravel to WordPress to improve flexibility, usability, and scalability.
+- **Budget Reallocation:** Front-loaded the budget during the first three months to focus on design, development, and technical SEO improvements while pausing standard marketing activities.
+- **Strategic Focus:** Optimised the website for future growth and reduced long-term costs, facilitating easier updates.
+
+### Client Testimonial
+> “The re-platforming work that Door4 have carried out has made a significant improvement to our internal processes and customer journey. Through the excellent insights Door4 provide on consumer behaviour, we can update our website easily and best establish a thorough CRO and SEO plan moving forward that will ultimately drive greater web conversion and improve our customer experience.”
+>  
+> — Sophie Page, Digital Brand Manager
+
+### The Conclusion
+The project resulted in a significantly more flexible and user-friendly website on both the front end and back end. After the intensive three-month period, regular marketing activities resumed, leading to enhanced lead generation, ROI, and an improved customer experience. The strategic budget reallocation has positioned Plumbs for long-term success.
+
+---
+
+## National Fostering Group Case Study
+*Sector: Family/Social – Lead Generation*  
+**How we overtook the market leader with a comprehensive SEO Strategy**
+
+### Services Involved
+- SEO
+- Content creation and optimisation
+- Keyword research & optimisation
+- Structured and relevant content production
+
+### The Challenge
+National Fostering Group, the UK’s largest independent fostering agency, achieved significant lead generation through aggressive paid advertising. However, they needed to develop a robust organic presence to complement this success.
+
+**Key Challenges:**
+- Achieving top organic visibility against a dominant UK fostering charity.
+- Limited resources to build organic authority for core keywords.
+- Balancing paid advertising success with long-term organic growth.
+
+### The Approach
+Our long-term SEO strategy focused on:
+1. **Unified Authority:**  
+   Rebuilding multiple disparate websites into one authoritative source for fostering information.
+2. **Keyword Strategy:**  
+   Extensive research, implementation, and ongoing optimisation to align with target audience searches.
+3. **Link-Building:**  
+   Robust internal and external linking efforts to boost authority.
+4. **Technical & On-Page Optimisation:**  
+   Regular technical evaluations and site improvements for optimal user experience.
+5. **Content Production:**  
+   Structured creation of new content and enhancement of existing copy based on search trends.
+6. **Holistic Integration:**  
+   Collaboration across Paid Search, Paid Social, CRO/UX, and other digital channels.
+
+### The Success Criteria
+The effectiveness of the SEO strategy was measured over the long term:
+- In 2022, independent data confirmed that we overtook the market leader for organic visibility on high-value keywords.
+
+### The Conclusion
+Our persistent, data-driven approach elevated National Fostering Group’s organic performance to new heights, demonstrating the effectiveness of a comprehensive SEO strategy. 
+
+**Client Testimonial:**
+
+> “When we first started working together, the brief I gave them was a challenging one, with both technical and design difficulties. However, the team really took time to immerse themselves in our brand, to understand our target audience and deliver above and beyond what we ask for. Over the years we have built an open and honest relationship and it is very clear the team genuinely care about what we do, which in our industry, really matters. They provide us with daily support and advice, allowing us to explore new and exciting ways to grow our marketing strategy (and our results speak for themselves). The team at Door4 are incredibly knowledgeable, experts in their fields and a dream to work with, what more could we want from a digital partner?”
+>  
+> — Emma Finch, Head of Carer Attraction
+
+---
+
+This combined file now contains all three case studies in one place with clear section breaks, making it easy for the assistant to reference any part of the content as needed.

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Door4 Chatbot</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div id="testBanner" class="test-banner hidden">
+        ⚠️ You are running in <strong>TEST MODE</strong>
+    </div>
+
+    <!-- 💬 CHAT OUTPUT AREA -->
+    <div id="chatBox"></div>
+    <!-- ✨ Typing Indicator -->
+    <div id="typingIndicator" class="typing-indicator hidden">
+        Mac is replying<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+
+    <!-- 🧾 INPUT FIELD + SEND BUTTON -->
+    <div id="inputArea">
+        <input id="userInput" type="text" placeholder="Ask something..." />
+        <button onclick="send()">Send</button>
+    </div>
+
+    <!-- 🔁 RESET BUTTON -->
+    <div style="text-align: center; padding: 10px;">
+        <button onclick="resetChat()"
+            style="background: #eee; color: #333; padding: 8px 16px; border-radius: 6px; border: 1px solid #aaa; cursor: pointer;">
+            Reset Chat
+        </button>
+    </div>
+
+    <!-- 🧠 CHATBOT LOGIC -->
+    <script>
+
+        const TESTING_MODE = true; // Toggle this for local testing
+        if (TESTING_MODE) {
+            document.getElementById("testBanner").classList.remove("hidden");
+        }
+
+
+        let typingInterval = null;
+
+        function showTyping() {
+            const indicator = document.getElementById("typingIndicator");
+            indicator.classList.remove("hidden");
+            indicator.classList.add("visible");
+
+            // Start animated dots
+            const dots = document.getElementById("dots");
+            let dotCount = 1;
+            typingInterval = setInterval(() => {
+                dotCount = (dotCount % 3) + 1;
+                dots.textContent = '.'.repeat(dotCount);
+            }, 500);
+        }
+
+        function hideTyping() {
+            const indicator = document.getElementById("typingIndicator");
+            indicator.classList.remove("visible");
+            indicator.classList.add("hidden");
+
+            // Stop animated dots
+            clearInterval(typingInterval);
+            document.getElementById("dots").textContent = '.';
+        }
+
+
+
+        const input = document.getElementById("userInput");
+        const chat = document.getElementById("chatBox");
+
+        // 📦 Load saved thread and message history
+        const savedThreadId = localStorage.getItem("threadId");
+        const savedMessages = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+
+        // 💬 Restore previous messages
+        savedMessages.forEach(({ role, text }) => addMessage(role, text));
+
+        // 🚀 Auto-start chat if fresh session
+        if (!savedThreadId && savedMessages.length === 0) {
+            setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
+        }
+
+        // ⌨️ Handle ENTER key press
+        input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        // 📤 Send user message to backend (or override)
+        async function send(msgOverride = null) {
+            const message = msgOverride || input.value.trim();
+            if (!message) return;
+
+            const isHiddenUserCommand = /^\[\[.*\]\]$/.test(message);
+
+            if (!msgOverride && !isHiddenUserCommand) {
+                addMessage("user", message);
+                input.value = "";
+            }
+
+            const threadId = localStorage.getItem("threadId");
+
+            try {
+                showTyping(); // 🔥 Show typing animation
+
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message, threadId })
+                });
+
+                const data = await res.json();
+                hideTyping(); // ✅ Hide when response arrives
+
+                if (data.reply) {
+                    addMessage("bot", data.reply);
+
+                    if (data.threadId) {
+                        localStorage.setItem("threadId", data.threadId);
+                    }
+
+                    const history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+                    history.push({ role: "user", text: message });
+                    history.push({ role: "bot", text: data.reply });
+                    localStorage.setItem("chatHistory", JSON.stringify(history));
+                } else {
+                    addMessage("bot", "Sorry, something went wrong.");
+                }
+            } catch (err) {
+                hideTyping(); // ❌ Still hide on error
+                console.error("Error sending message:", err);
+                addMessage("bot", "Sorry, there was a problem connecting.");
+            }
+
+            input.focus();
+        }
+
+        // 🧱 Add a message (user or bot) to the UI
+        function addMessage(role, text) {
+  const container = document.createElement("div");
+
+  // 🔍 Hidden command check
+  const isHidden = /^\[\[.*\]\]$/.test(text.trim());
+
+  // 🔍 Extract options: all `{{...}}`
+  const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
+
+  // 🧼 Clean display message:
+  const cleanedText = text
+  // Remove entire lines like "- {{Option}}"
+  .replace(/^\s*[-*+•]\s*\{\{.*?\}\}\s*$/gm, '')
+  // Remove any standalone {{...}} just in case
+  .replace(/\{\{.*?\}\}/g, '')
+  // Remove [[commands]]
+  .replace(/\[\[.*?\]\]/g, '')
+  // Remove citation references unless in test mode
+  .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
+  // Remove leftover empty lines or whitespace-only lines
+  .replace(/^\s*[\r\n]/gm, '')
+  // Convert raw links to anchor tags
+  .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+  // Convert newlines to <br>
+  .replace(/\n/g, '<br>')
+  .trim();
+
+  if (isHidden || !cleanedText) return;
+
+  const div = document.createElement("div");
+  div.className = `message ${role}`;
+  div.innerHTML = cleanedText;
+  container.appendChild(div);
+
+  // ✅ Render buttons under the bot message
+  if (role === "bot" && matches.length > 0) {
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "bot-option-container";
+
+    matches.forEach(match => {
+      const btnText = match[1];
+      const btn = document.createElement("button");
+      btn.innerText = btnText;
+      btn.className = "bot-option";
+      btn.onclick = () => {
+        addMessage("user", btnText);
+        send(btnText);
+        buttonRow.remove();
+      };
+      buttonRow.appendChild(btn);
+    });
+
+    container.appendChild(buttonRow);
+  }
+
+  chat.appendChild(container);
+  chat.scrollTop = chat.scrollHeight;
+  input.focus();
+}
+
+        // 🔁 Reset the chat completely
+        function resetChat() {
+            const confirmReset = confirm("Are you sure you want to reset this chat?");
+            if (confirmReset) {
+                localStorage.removeItem("threadId");
+                localStorage.removeItem("chatHistory");
+                chat.innerHTML = '';
+                send("[[BEGIN-CHAT]]");
+            }
+        }
+
+        function showTyping() {
+            document.getElementById("typingIndicator").classList.remove("hidden");
+            document.getElementById("typingIndicator").classList.add("visible");
+        }
+
+        function hideTyping() {
+            document.getElementById("typingIndicator").classList.remove("visible");
+            document.getElementById("typingIndicator").classList.add("hidden");
+        }
+
+
+    </script>
+
+</body>
+
+</html>
