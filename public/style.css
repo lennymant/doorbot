@@ -1,114 +1,126 @@
+/* Base styles – now responsive using rem units */
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f7f7f7;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  
-  #chatBox {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .user {
-    align-self: flex-end;
-    background-color: #0077cc;
-    color: white;
-    border-bottom-right-radius: 0;
-  }
-    
-  .bot {
-    align-self: flex-start;
-    background-color: #e5e7eb;
-    color: #111;
-    border-bottom-left-radius: 0;
-  }
-  
-  .message {
-    max-width: 70%;
-    padding: 10px 14px;
-    margin: 5px 0;
-    border-radius: 16px;
-    line-height: 1.4em;
-    display: inline-block;
-  }
-  
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-size: 1rem;
+}
 
-  .bot-option {
-    margin-right: 8px;
-    margin-top: 8px;
-    padding: 10px 16px;
-    border-radius: 20px;
-    border: none;
-    background-color: #0077cc;  /* Door4 blue */
-    color: #555;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    display: inline-block;
-  }
-  
-  .bot-option:hover {
-    background-color: #005fa3;
-  }
-    
-  
-  #inputArea {
-    display: flex;
-    border-top: 1px solid #ccc;
-    padding: 10px;
-    background: white;
-  }
-  
-  #userInput {
-    flex: 1;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-  
-  button {
-    margin-left: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #0077cc;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #005fa3;
-  }
-  
+#chatBox {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
 
-  .bot-option {
-  margin-right: 8px;
-  margin-top: 5px;
-  padding: 8px 12px;
-  border-radius: 6px;
+.message {
+  position: relative;
+  max-width: 70%;
+  padding: 0.625rem 0.875rem;
+  margin: 0.3125rem 0;
+  border-radius: 1rem;
+  line-height: 1.4em;
+  display: block;
+}
+
+/* Bot message bubble */
+.bot {
+  align-self: flex-start;
+  background-color: #e5e7eb;
+  color: #111;
+  border-bottom-left-radius: 0;
+}
+
+.bot::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 8px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-right: 10px solid #e5e7eb;
+}
+
+/* User message bubble */
+.user {
+  align-self: flex-end;
+  background-color: #0077cc;
+  color: white;
+  border-bottom-right-radius: 0;
+  text-align: right;
+  margin-left: auto;
+}
+
+.user::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  bottom: 8px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-left: 10px solid #0077cc;
+}
+
+.bot-option {
+  margin-right: 0.5rem;
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
   border: 1px solid #ccc;
   cursor: pointer;
   background: #fff;
-  font-size: 14px;
+  font-size: 0.875rem;
+  color: #333;
 }
 
 .bot-option:hover {
-  background: #f0f0f0;
+  background-color: #f0f0f0;
 }
+
+/* Input area at the bottom */
+#inputArea {
+  display: flex;
+  border-top: 1px solid #ccc;
+  padding: 0.75rem;
+  background: white;
+}
+
+#userInput {
+  flex: 1;
+  padding: 0.625rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.375rem;
+}
+
+button {
+  margin-left: 0.625rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+/* Typing indicator */
 .typing-indicator {
   text-align: left;
-  margin: 10px 20px;
+  margin: 0.625rem 1rem;
   font-style: italic;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -143,13 +155,13 @@ body {
   100% { opacity: 0; }
 }
 
-
+/* Banner at the top */
 .test-banner {
   background-color: #fff3cd;
   color: #856404;
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   text-align: center;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   border-bottom: 1px solid #ffeeba;
 }
@@ -157,3 +169,80 @@ body {
 .test-banner.hidden {
   display: none;
 }
+
+/* Prevent horizontal scrolling on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
+/* 🔄 Responsive overrides for mobile screens */
+@media screen and (max-width: 600px) {
+  #chatBox {
+    padding: 0.75rem;
+  }
+
+  .message {
+    max-width: 90%;
+    font-size: 0.95rem;
+  }
+
+  .bot-option {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  #userInput {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 1rem;
+    padding: 0.75rem 1rem;
+    background: #e5e7eb;
+    color: #333;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    width: fit-content;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+
+
+  .loading-overlay {
+    position: fixed;                 /* fixed positioning relative to viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;             /* vertically center */
+    justify-content: center;         /* horizontally center */
+    background: rgba(255, 255, 255, 0.85); /* Optional: semi-transparent background overlay */
+    z-index: 1000;                   /* ensure it's above all other elements */
+  }
+  
+  .loading-message {
+    background: #0077cc;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .hidden {
+    display: none;
+  }
+  

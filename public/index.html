@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta charset="UTF-8" />
   <title>Door4 Chatbot</title>
   <link rel="stylesheet" href="style.css" />
@@ -12,9 +14,14 @@
     ⚠️ You are running in <strong>TEST MODE</strong>
   </div>
 
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-message">⏳ Opening Door4 chat... hold tight...</div>
+  </div>
+  
+
   <div id="chatBox"></div>
   <div id="typingIndicator" class="typing-indicator hidden">
-    Mac is replying<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+    Mac is typing<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
   </div>
 
   <div id="inputArea">
@@ -44,6 +51,8 @@
     savedMessages.forEach(({ role, text }) => addMessage(role, text));
 
     if (!savedThreadId && savedMessages.length === 0) {
+      document.getElementById("loadingOverlay").classList.remove("hidden");
+
       setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
     }
 
@@ -80,6 +89,7 @@
         hideTyping();
 
         if (data.reply) {
+          document.getElementById("loadingOverlay").classList.add("hidden");
           addMessage("bot", data.reply);
           if (data.threadId) {
             localStorage.setItem("threadId", data.threadId);
@@ -106,13 +116,32 @@
       const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
 
       const cleanedText = text
-        .replace(/^\s*[-*]\s*\{\{.*?\}\}\s*$/gm, '')
-        .replace(/\{\{.*?\}\}/g, '')
-        .replace(/\[\[.*?\]\]/g, '')
-        .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-        .replace(/\n/g, '<br>')
-        .trim();
+  // 1. Remove entire lines containing only list-style {{...}} options
+  .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
+  
+  // 2. Remove any remaining inline {{...}} placeholders
+  .replace(/\{\{.*?\}\}/g, '')
+
+  // 3. Remove hidden system commands like [[BEGIN-CHAT]]
+  .replace(/\[\[.*?\]\]/g, '')
+
+  // 4. Remove any special citation markup if not in testing mode
+  .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
+
+  // 5. Convert URLs to anchor links
+  .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+
+  // 6. Collapse multiple blank lines to a single newline
+  .replace(/\n{2,}/g, '\n')
+
+  // 7. Trim spaces around lines and remove stray newlines
+  .replace(/^\s+|\s+$/gm, '')
+
+  // 8. Convert remaining single newlines to <br>
+  .replace(/\n/g, '<br>')
+
+  // 9. Final trim to catch any trailing <br> or whitespace
+  .trim();
 
       if (isHidden || !cleanedText) return;
 
@@ -147,14 +176,19 @@
     }
 
     function resetChat() {
-      const confirmReset = confirm("Are you sure you want to reset this chat?");
-      if (confirmReset) {
-        localStorage.removeItem("threadId");
-        localStorage.removeItem("chatHistory");
-        chat.innerHTML = '';
-        send("[[BEGIN-CHAT]]");
-      }
-    }
+  const confirmReset = confirm("Are you sure you want to reset this chat?");
+  if (confirmReset) {
+    localStorage.removeItem("threadId");
+    localStorage.removeItem("chatHistory");
+    chat.innerHTML = '';
+
+    // 🔥 Show the loading overlay again
+    document.getElementById("loadingOverlay").classList.remove("hidden");
+
+    // Trigger new chat thread
+    send("[[BEGIN-CHAT]]");
+  }
+}
 
     function showTyping() {
       document.getElementById("typingIndicator").classList.remove("hidden");
