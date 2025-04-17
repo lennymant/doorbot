@@ -17,7 +17,7 @@
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loading-message">⏳ Opening Door4 chat... hold tight...</div>
   </div>
-  
+
 
   <div id="chatBox"></div>
   <div id="typingIndicator" class="typing-indicator hidden">
@@ -116,32 +116,32 @@
       const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
 
       const cleanedText = text
-  // 1. Remove entire lines containing only list-style {{...}} options
-  .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
-  
-  // 2. Remove any remaining inline {{...}} placeholders
-  .replace(/\{\{.*?\}\}/g, '')
+        // 1. Remove entire lines containing only list-style {{...}} options
+        .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
 
-  // 3. Remove hidden system commands like [[BEGIN-CHAT]]
-  .replace(/\[\[.*?\]\]/g, '')
+        // 2. Remove any remaining inline {{...}} placeholders
+        .replace(/\{\{.*?\}\}/g, '')
 
-  // 4. Remove any special citation markup if not in testing mode
-  .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
+        // 3. Remove hidden system commands like [[BEGIN-CHAT]]
+        .replace(/\[\[.*?\]\]/g, '')
 
-  // 5. Convert URLs to anchor links
-  .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+        // 4. Remove any special citation markup if not in testing mode
+        .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
 
-  // 6. Collapse multiple blank lines to a single newline
-  .replace(/\n{2,}/g, '\n')
+        // 5. Convert URLs to anchor links
+        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
 
-  // 7. Trim spaces around lines and remove stray newlines
-  .replace(/^\s+|\s+$/gm, '')
+        // 6. Collapse multiple blank lines to a single newline
+        .replace(/\n{2,}/g, '\n')
 
-  // 8. Convert remaining single newlines to <br>
-  .replace(/\n/g, '<br>')
+        // 7. Trim spaces around lines and remove stray newlines
+        .replace(/^\s+|\s+$/gm, '')
 
-  // 9. Final trim to catch any trailing <br> or whitespace
-  .trim();
+        // 8. Convert remaining single newlines to <br>
+        .replace(/\n/g, '<br>')
+
+        // 9. Final trim to catch any trailing <br> or whitespace
+        .trim();
 
       if (isHidden || !cleanedText) return;
 
@@ -176,29 +176,31 @@
     }
 
     function resetChat() {
-  const confirmReset = confirm("Are you sure you want to reset this chat?");
-  if (confirmReset) {
-    localStorage.removeItem("threadId");
-    localStorage.removeItem("chatHistory");
-    chat.innerHTML = '';
+      const confirmReset = confirm("Are you sure you want to reset this chat?");
+      if (confirmReset) {
+        localStorage.removeItem("threadId");
+        localStorage.removeItem("chatHistory");
+        chat.innerHTML = '';
 
-    // 🔥 Show the loading overlay again
-    document.getElementById("loadingOverlay").classList.remove("hidden");
+        // 🔥 Show the loading overlay again
+        document.getElementById("loadingOverlay").classList.remove("hidden");
 
-    // Trigger new chat thread
-    send("[[BEGIN-CHAT]]");
-  }
-}
+        // Trigger new chat thread
+        send("[[BEGIN-CHAT]]");
+      }
+    }
 
     function showTyping() {
-      document.getElementById("typingIndicator").classList.remove("hidden");
-      document.getElementById("typingIndicator").classList.add("visible");
-    }
+  document.getElementById("typingIndicator").classList.remove("hidden");
+  document.getElementById("typingIndicator").classList.add("visible");
+  document.getElementById("chatBox").classList.add("typing-active");
+}
 
-    function hideTyping() {
-      document.getElementById("typingIndicator").classList.remove("visible");
-      document.getElementById("typingIndicator").classList.add("hidden");
-    }
+function hideTyping() {
+  document.getElementById("typingIndicator").classList.remove("visible");
+  document.getElementById("typingIndicator").classList.add("hidden");
+  document.getElementById("chatBox").classList.remove("typing-active");
+}
   </script>
 </body>
 
