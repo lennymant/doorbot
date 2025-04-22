@@ -10,6 +10,8 @@
 </head>
 
 <body>
+  <audio id="blipSound" src="sounds/doubletap.mp3" preload="auto"></audio>
+
   <div id="testBanner" class="test-banner hidden">
     ⚠️ You are running in <strong>TEST MODE</strong>
   </div>
@@ -147,28 +149,35 @@
 
       const div = document.createElement("div");
       div.className = `message ${role}`;
-      div.innerHTML = cleanedText;
+      div.innerHTML = marked.parse(cleanedText);
       container.appendChild(div);
 
-      if (role === "bot" && matches.length > 0) {
-        const buttonRow = document.createElement("div");
-        buttonRow.className = "bot-option-container";
+      if (role === "bot" && !isHidden && cleanedText) {
+  const blip = document.getElementById("blipSound");
+  blip.currentTime = 0;  // rewind to start
+  blip.play();
+}
 
-        matches.forEach(match => {
-          const btnText = match[1];
-          const btn = document.createElement("button");
-          btn.innerText = btnText;
-          btn.className = "bot-option";
-          btn.onclick = () => {
-            addMessage("user", btnText);
-            send(btnText);
-            buttonRow.remove();
-          };
-          buttonRow.appendChild(btn);
-        });
+if (role === "bot" && matches.length > 0) {
+  const buttonRow = document.createElement("div");
+  buttonRow.className = "bot-option-container";
 
-        container.appendChild(buttonRow);
-      }
+  matches.forEach(match => {
+    const btnText = match[1];
+    const btn = document.createElement("button");
+    btn.innerText = btnText;
+    btn.className = "bot-option";
+    btn.onclick = () => {
+      addMessage("user", btnText);
+      send(btnText);
+      buttonRow.remove();
+    };
+    buttonRow.appendChild(btn);
+  });
+
+  container.appendChild(buttonRow);
+}
+
 
       chat.appendChild(container);
       chat.scrollTop = chat.scrollHeight;
@@ -191,17 +200,19 @@
     }
 
     function showTyping() {
-  document.getElementById("typingIndicator").classList.remove("hidden");
-  document.getElementById("typingIndicator").classList.add("visible");
-  document.getElementById("chatBox").classList.add("typing-active");
-}
+      document.getElementById("typingIndicator").classList.remove("hidden");
+      document.getElementById("typingIndicator").classList.add("visible");
+      document.getElementById("chatBox").classList.add("typing-active");
+    }
 
-function hideTyping() {
-  document.getElementById("typingIndicator").classList.remove("visible");
-  document.getElementById("typingIndicator").classList.add("hidden");
-  document.getElementById("chatBox").classList.remove("typing-active");
-}
+    function hideTyping() {
+      document.getElementById("typingIndicator").classList.remove("visible");
+      document.getElementById("typingIndicator").classList.add("hidden");
+      document.getElementById("chatBox").classList.remove("typing-active");
+    }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 </body>
 
 </html>
