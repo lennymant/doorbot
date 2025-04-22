@@ -58,16 +58,16 @@
       setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-  const input = document.getElementById("userInput");
+    document.addEventListener("DOMContentLoaded", function () {
+      const input = document.getElementById("userInput");
 
-  input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      send();
-    }
-  });
-});
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          send();
+        }
+      });
+    });
 
     async function send(msgOverride = null) {
       const message = msgOverride || input.value.trim();
@@ -116,38 +116,38 @@
       input.focus();
     }
 
+
+    const renderer = new marked.Renderer();
+
+renderer.link = function (href, title, text) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
+marked.setOptions({ renderer });
+
+
+
     function addMessage(role, text) {
       const container = document.createElement("div");
       const isHidden = /^\[\[.*\]\]$/.test(text.trim());
       const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
 
       const cleanedText = text
-        // 1. Remove entire lines containing only list-style {{...}} options
-        .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
-
-        // 2. Remove any remaining inline {{...}} placeholders
-        .replace(/\{\{.*?\}\}/g, '')
-
-        // 3. Remove hidden system commands like [[BEGIN-CHAT]]
+        // Remove hidden system commands like [[BEGIN-CHAT]]
         .replace(/\[\[.*?\]\]/g, '')
 
-        // 4. Remove any special citation markup if not in testing mode
+        // Remove lines that ONLY contain button placeholders
+        .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
+
+        // Remove any inline {{button}} placeholders
+        .replace(/\{\{.*?\}\}/g, '')
+
+        // Remove citations if not in testing mode
         .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
 
-        // 5. Convert URLs to anchor links
-        // not required due to marked.parse
-        // .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+        // Collapse excessive blank lines
+        .replace(/\n{3,}/g, '\n\n')
 
-        // 6. Collapse multiple blank lines to a single newline
-        .replace(/\n{2,}/g, '\n')
-
-        // 7. Trim spaces around lines and remove stray newlines
-        .replace(/^\s+|\s+$/gm, '')
-
-        // 8. Convert remaining single newlines to <br>
-        .replace(/\n/g, '<br>')
-
-        // 9. Final trim to catch any trailing <br> or whitespace
         .trim();
 
       if (isHidden || !cleanedText) return;
@@ -155,45 +155,34 @@
       const div = document.createElement("div");
       div.className = `message ${role}`;
 
-      const renderer = new marked.Renderer();
-
-renderer.link = function(href, title, text) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-};
-
-marked.setOptions({
-  renderer: renderer
-});
-
-
       div.innerHTML = marked.parse(cleanedText);
       container.appendChild(div);
 
       if (role === "bot" && !isHidden && cleanedText) {
-  const blip = document.getElementById("blipSound");
-  blip.currentTime = 0;  // rewind to start
-  blip.play();
-}
+        const blip = document.getElementById("blipSound");
+        blip.currentTime = 0;  // rewind to start
+        blip.play();
+      }
 
-if (role === "bot" && matches.length > 0) {
-  const buttonRow = document.createElement("div");
-  buttonRow.className = "bot-option-container";
+      if (role === "bot" && matches.length > 0) {
+        const buttonRow = document.createElement("div");
+        buttonRow.className = "bot-option-container";
 
-  matches.forEach(match => {
-    const btnText = match[1];
-    const btn = document.createElement("button");
-    btn.innerText = btnText;
-    btn.className = "bot-option";
-    btn.onclick = () => {
-      addMessage("user", btnText);
-      send(btnText);
-      buttonRow.remove();
-    };
-    buttonRow.appendChild(btn);
-  });
+        matches.forEach(match => {
+          const btnText = match[1];
+          const btn = document.createElement("button");
+          btn.innerText = btnText;
+          btn.className = "bot-option";
+          btn.onclick = () => {
+            addMessage("user", btnText);
+            send(btnText);
+            buttonRow.remove();
+          };
+          buttonRow.appendChild(btn);
+        });
 
-  container.appendChild(buttonRow);
-}
+        container.appendChild(buttonRow);
+      }
 
 
       chat.appendChild(container);
