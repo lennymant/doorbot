@@ -218,6 +218,16 @@ html, body {
     max-width: 90%;
     font-size: 0.95rem;
   }
+  .message a {
+    color: #0077cc;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  
+  .message a:hover {
+    color: #005fa3;
+  }
+  
 
   .bot-option {
     font-size: 0.85rem;

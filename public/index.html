@@ -58,12 +58,16 @@
       setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
     }
 
-    input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        send();
-      }
-    });
+    document.addEventListener("DOMContentLoaded", function() {
+  const input = document.getElementById("userInput");
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      send();
+    }
+  });
+});
 
     async function send(msgOverride = null) {
       const message = msgOverride || input.value.trim();
@@ -131,7 +135,8 @@
         .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
 
         // 5. Convert URLs to anchor links
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+        // not required due to marked.parse
+        // .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
 
         // 6. Collapse multiple blank lines to a single newline
         .replace(/\n{2,}/g, '\n')
@@ -149,6 +154,18 @@
 
       const div = document.createElement("div");
       div.className = `message ${role}`;
+
+      const renderer = new marked.Renderer();
+
+renderer.link = function(href, title, text) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
+marked.setOptions({
+  renderer: renderer
+});
+
+
       div.innerHTML = marked.parse(cleanedText);
       container.appendChild(div);
 
