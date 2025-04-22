@@ -3,34 +3,40 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <meta charset="UTF-8" />
   <title>Door4 Chatbot</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <!-- 🔊 Sound for bot reply -->
   <audio id="blipSound" src="sounds/doubletap.mp3" preload="auto"></audio>
 
+  <!-- ⚠️ Test Mode Banner -->
   <div id="testBanner" class="test-banner hidden">
     ⚠️ You are running in <strong>TEST MODE</strong>
   </div>
 
+  <!-- ⏳ Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loading-message">⏳ Opening Door4 chat... hold tight...</div>
   </div>
 
-
+  <!-- 💬 Chat Area -->
   <div id="chatBox"></div>
+
+  <!-- ✍️ Typing Indicator -->
   <div id="typingIndicator" class="typing-indicator hidden">
     Mac is typing<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
   </div>
 
+  <!-- 🔹 Input Area -->
   <div id="inputArea">
     <input id="userInput" type="text" placeholder="Ask something..." />
     <button onclick="send()">Send</button>
   </div>
 
+  <!-- 🔄 Reset Chat Button -->
   <div style="text-align: center; padding: 10px;">
     <button onclick="resetChat()"
       style="background: #eee; color: #333; padding: 8px 16px; border-radius: 6px; border: 1px solid #aaa; cursor: pointer;">
@@ -38,8 +44,21 @@
     </button>
   </div>
 
+  <!-- ⚠️ Reset Confirmation Modal -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content">
+      <p>Are you sure you want to reset this chat?</p>
+      <button id="confirmYes">Yes, reset</button>
+      <button id="confirmNo">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- 🚀 Main Script -->
+  <!-- ========================= -->
   <script>
     const TESTING_MODE = true;
+
     if (TESTING_MODE) {
       document.getElementById("testBanner").classList.remove("hidden");
     }
@@ -47,6 +66,29 @@
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chatBox");
 
+    // Handle "Enter to Send"
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    // Setup Modal Listeners ONCE
+    const modal = document.getElementById("confirmModal");
+    document.getElementById("confirmYes").onclick = function() {
+      modal.classList.add("hidden");
+      localStorage.removeItem("threadId");
+      localStorage.removeItem("chatHistory");
+      chat.innerHTML = '';
+      document.getElementById("loadingOverlay").classList.remove("hidden");
+      send("[[BEGIN-CHAT]]");
+    };
+    document.getElementById("confirmNo").onclick = function() {
+      modal.classList.add("hidden");
+    };
+
+    // Load Previous Chat if Exists
     const savedThreadId = localStorage.getItem("threadId");
     const savedMessages = JSON.parse(localStorage.getItem("chatHistory") || "[]");
 
@@ -54,20 +96,19 @@
 
     if (!savedThreadId && savedMessages.length === 0) {
       document.getElementById("loadingOverlay").classList.remove("hidden");
-
       setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const input = document.getElementById("userInput");
+    // Renderer for Markdown Links
+    const renderer = new marked.Renderer();
+    renderer.link = function (href, title, text) {
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    };
+    marked.setOptions({ renderer });
 
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          send();
-        }
-      });
-    });
+    // ---------------------------
+    // Functions
+    // ---------------------------
 
     async function send(msgOverride = null) {
       const message = msgOverride || input.value.trim();
@@ -116,51 +157,29 @@
       input.focus();
     }
 
-
-    const renderer = new marked.Renderer();
-
-renderer.link = function (href, title, text) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-};
-
-marked.setOptions({ renderer });
-
-
-
     function addMessage(role, text) {
       const container = document.createElement("div");
       const isHidden = /^\[\[.*\]\]$/.test(text.trim());
       const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
 
       const cleanedText = text
-        // Remove hidden system commands like [[BEGIN-CHAT]]
         .replace(/\[\[.*?\]\]/g, '')
-
-        // Remove lines that ONLY contain button placeholders
         .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
-
-        // Remove any inline {{button}} placeholders
         .replace(/\{\{.*?\}\}/g, '')
-
-        // Remove citations if not in testing mode
         .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
-
-        // Collapse excessive blank lines
         .replace(/\n{3,}/g, '\n\n')
-
         .trim();
 
       if (isHidden || !cleanedText) return;
 
       const div = document.createElement("div");
       div.className = `message ${role}`;
-
       div.innerHTML = marked.parse(cleanedText);
       container.appendChild(div);
 
-      if (role === "bot" && !isHidden && cleanedText) {
+      if (role === "bot" && !isHidden) {
         const blip = document.getElementById("blipSound");
-        blip.currentTime = 0;  // rewind to start
+        blip.currentTime = 0;
         blip.play();
       }
 
@@ -184,41 +203,29 @@ marked.setOptions({ renderer });
         container.appendChild(buttonRow);
       }
 
-
       chat.appendChild(container);
       chat.scrollTop = chat.scrollHeight;
       input.focus();
     }
 
     function resetChat() {
-      const confirmReset = confirm("Are you sure you want to reset this chat?");
-      if (confirmReset) {
-        localStorage.removeItem("threadId");
-        localStorage.removeItem("chatHistory");
-        chat.innerHTML = '';
-
-        // 🔥 Show the loading overlay again
-        document.getElementById("loadingOverlay").classList.remove("hidden");
-
-        // Trigger new chat thread
-        send("[[BEGIN-CHAT]]");
-      }
+      modal.classList.remove("hidden");
     }
 
     function showTyping() {
       document.getElementById("typingIndicator").classList.remove("hidden");
       document.getElementById("typingIndicator").classList.add("visible");
-      document.getElementById("chatBox").classList.add("typing-active");
+      chat.classList.add("typing-active");
     }
 
     function hideTyping() {
       document.getElementById("typingIndicator").classList.remove("visible");
       document.getElementById("typingIndicator").classList.add("hidden");
-      document.getElementById("chatBox").classList.remove("typing-active");
+      chat.classList.remove("typing-active");
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 
 </html>
