@@ -1,15 +1,40 @@
 /* ===================================================
+   CSS Variables
+=================================================== */
+:root {
+  /* Primary Colors */
+  --color-primary: #0077cc;
+  --color-primary-dark: #005fa3;
+  
+  /* Message Colors */
+  --color-user-bg: #0077cc;
+  --color-bot-bg: #e5e7eb;
+  --color-bot-text: #111;
+  
+  /* Button Colors */
+  --color-button-bg: #acacac;
+  --color-button-hover: #999;
+  --color-button-text: white;
+  
+  /* UI Colors */
+  --color-background: #f7f7f7;
+  --color-border: #ccc;
+  --color-text: #333;
+  --color-text-light: #666;
+}
+
+/* ===================================================
    Base Layout & Global Styles
 =================================================== */
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
-  background: #f7f7f7;
+  font-family: 'Open Sans', sans-serif;
+  background: var(--color-background);
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-size: 1rem;
+  font-size: 0.95rem;
   overflow-x: hidden;  /* Prevent horizontal scrolling */
 }
 
@@ -19,31 +44,33 @@ html, body {
 =================================================== */
 #chatBox {
   flex: 1;
-  padding: 1rem;
+  padding: 0.5rem;
+  padding-bottom: 6rem;  /* Increased space for typing indicator */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 #chatBox.typing-active {
-  padding-bottom: 3rem;  /* Space for typing indicator */
+  padding-bottom: 6rem;  /* Keep consistent padding when typing */
 }
 
 .message {
   position: relative;
-  max-width: 70%;
-  padding: 0.625rem 0.875rem;
-  margin: 0.3125rem 0;
-  border-radius: 1rem;
-  line-height: 1.4em;
+  max-width: 65%;  /* Slightly reduced max width */
+  padding: 0.35rem 0.6rem;  /* Further reduced padding */
+  margin: 0.2rem 0;  /* Further reduced margin */
+  border-radius: 0.8rem;  /* Slightly reduced border radius */
+  line-height: 1.2em;  /* Further reduced line height */
   display: block;
   word-break: break-word;
+  font-size: 0.95rem;  /* Slightly reduced font size */
 }
 
 /* User Message Bubble */
 .user {
   align-self: flex-end;
-  background-color: #0077cc;
+  background-color: var(--color-user-bg);
   color: white;
   border-bottom-right-radius: 0;
   text-align: right;
@@ -53,63 +80,82 @@ html, body {
 .user::after {
   content: '';
   position: absolute;
-  right: -10px;
-  bottom: 8px;
+  right: -6px;  /* Further reduced position */
+  bottom: 4px;  /* Further reduced position */
   width: 0;
   height: 0;
-  border-top: 10px solid transparent;
-  border-left: 10px solid #0077cc;
+  border-top: 6px solid transparent;  /* Further reduced size */
+  border-left: 6px solid var(--color-user-bg);  /* Further reduced size */
 }
 
 /* Bot Message Bubble */
 .bot {
   align-self: flex-start;
-  background-color: #e5e7eb;
-  color: #111;
+  background-color: var(--color-bot-bg);
+  color: var(--color-bot-text);
   border-bottom-left-radius: 0;
 }
 
 .bot::after {
   content: '';
   position: absolute;
-  left: -10px;
-  bottom: 8px;
+  left: -6px;  /* Further reduced position */
+  bottom: 4px;  /* Further reduced position */
   width: 0;
   height: 0;
-  border-top: 10px solid transparent;
-  border-right: 10px solid #e5e7eb;
+  border-top: 6px solid transparent;  /* Further reduced size */
+  border-right: 6px solid var(--color-bot-bg);  /* Further reduced size */
 }
 
 /* ===================================================
    Links in Messages
 =================================================== */
-.message a {
-  color: #ffffff;
+.user a {
+  color: white;
   text-decoration: underline;
   font-weight: 500;
 }
 
-.message a:hover {
+.user a:hover {
   color: #d0e7ff;
+}
+
+.bot a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.bot a:hover {
+  color: var(--color-bot-text);
 }
 
 /* ===================================================
    Bot Options (Buttons)
 =================================================== */
+.option-instruction {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
 .bot-option {
-  margin-right: 0.5rem;
-  margin-top: 0.3rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid #ccc;
+  margin-right: 0.4rem;  /* Further reduced margin */
+  margin-top: 0.2rem;  /* Further reduced margin */
+  padding: 0.3rem 0.5rem;  /* Further reduced padding */
+  border-radius: 0.3rem;  /* Slightly reduced border radius */
+  border: 1px solid var(--color-button-bg);
   cursor: pointer;
-  background: #fff;
-  font-size: 0.875rem;
-  color: #333;
+  background: var(--color-button-bg);
+  font-size: 0.85rem;  /* Further reduced font size */
+  color: var(--color-button-text);
+  font-family: 'Open Sans', sans-serif;
 }
 
 .bot-option:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-user-bg);
+  border-color: var(--color-user-bg);
 }
 
 /* ===================================================
@@ -134,7 +180,7 @@ button {
   margin-left: 0.625rem;
   padding: 0.625rem 1.25rem;
   font-size: 1rem;
-  background-color: #0077cc;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -142,20 +188,23 @@ button {
 }
 
 button:hover {
-  background-color: #005fa3;
+  background-color: var(--color-primary-dark);
 }
 
 /* ===================================================
    Typing Indicator
 =================================================== */
 .typing-indicator {
-  text-align: left;
-  margin: 0.625rem 1rem;
-  font-style: italic;
-  font-size: 0.875rem;
-  color: #666;
+  position: fixed;
+  bottom: 80px;  /* Position above the input area */
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 65%;
+  margin: 0.2rem 0;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
+  z-index: 100;  /* Ensure it stays above messages */
+  pointer-events: none;  /* Allow clicking through */
 }
 
 .typing-indicator.visible {
@@ -164,21 +213,71 @@ button:hover {
 
 .typing-indicator.hidden {
   opacity: 0;
+  pointer-events: none;
+}
+
+.typing-bubble {
+  display: flex;
+  align-items: flex-start;
+  background-color: var(--color-bot-bg);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.8rem;
+  border-bottom-left-radius: 0;
+  animation: pulse 2s infinite;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* Add subtle shadow */
+}
+
+.typing-avatar {
+  width: 18px;  /* Further reduced size */
+  height: 18px;  /* Further reduced size */
+  background: #0077cc;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.7rem;  /* Further reduced font size */
+  margin-right: 0.3rem;  /* Further reduced margin */
+}
+
+.typing-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.typing-name {
+  font-size: 0.65rem;  /* Further reduced font size */
+  color: #666;
+  margin-bottom: 0.1rem;  /* Further reduced margin */
+}
+
+.typing-dots {
+  display: flex;
+  gap: 0.15rem;  /* Further reduced gap */
 }
 
 .typing-dots span {
-  animation: blink 1.2s infinite;
-  opacity: 0;
+  width: 4px;  /* Further reduced size */
+  height: 4px;  /* Further reduced size */
+  background: #666;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite;
 }
 
 .typing-dots span:nth-child(1) { animation-delay: 0s; }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes blink {
-  0% { opacity: 0; }
-  20% { opacity: 1; }
-  100% { opacity: 0; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); }
+  40% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
 }
 
 /* ===================================================
@@ -215,10 +314,69 @@ button:hover {
 .loading-message {
   background: #0077cc;
   color: white;
-  padding: 1rem 2rem;
+  padding: 1.5rem 2rem;
   border-radius: 10px;
   font-size: 1.25rem;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-circle {
+  width: 24px;
+  height: 24px;
+  border: 2px solid white;
+  border-radius: 50%;
+  position: relative;
+  animation: circleFill 2s infinite;
+}
+
+.loading-circle::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: white;
+  animation: circleTop 2s infinite;
+}
+
+.loading-circle::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-left-color: white;
+  animation: circleLeft 2s infinite;
+}
+
+.loading-text {
+  font-weight: 500;
+}
+
+@keyframes circleFill {
+  0%, 100% { background: transparent; }
+  25% { background: white; }
+  50% { background: transparent; }
+  75% { background: #0077cc; }
+}
+
+@keyframes circleTop {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(180deg); }
+}
+
+@keyframes circleLeft {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
 }
 
 /* ===================================================
@@ -310,4 +468,71 @@ button:hover {
 =================================================== */
 .hidden {
   display: none !important;
+}
+
+/* ===================================================
+   Chat Ended Message
+=================================================== */
+.chat-ended {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 1rem;
+  text-align: center;
+}
+
+.chat-ended-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.chat-ended-icon {
+  background: #28a745;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.chat-ended-text {
+  font-weight: 500;
+}
+
+/* ===================================================
+   Reset Button
+=================================================== */
+.reset-button-container {
+  text-align: center;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.reset-button {
+  background: #eee;
+  color: #333;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.reset-button:hover {
+  background: #ddd;
+}
+
+.timestamp {
+  color: var(--color-text-light);
+  font-size: 0.8rem;
+  font-family: monospace;
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="UTF-8" />
   <title>Door4 Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -19,7 +20,10 @@
 
   <!-- ⏳ Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay hidden">
-    <div class="loading-message">⏳ Opening Door4 chat... hold tight...</div>
+    <div class="loading-message">
+      <div class="loading-circle"></div>
+      <div class="loading-text">Opening Door4 chat... hold tight...</div>
+    </div>
   </div>
 
   <!-- 💬 Chat Area -->
@@ -27,21 +31,31 @@
 
   <!-- ✍️ Typing Indicator -->
   <div id="typingIndicator" class="typing-indicator hidden">
-    Mac is typing<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+    <div class="typing-bubble">
+      <div class="typing-avatar">M</div>
+      <div class="typing-content">
+        <div class="typing-name">Mac</div>
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 🔹 Input Area -->
   <div id="inputArea">
     <input id="userInput" type="text" placeholder="Ask something..." />
-    <button onclick="send()">Send</button>
+    <button onclick="handleSend()">Send</button>
   </div>
 
   <!-- 🔄 Reset Chat Button -->
-  <div style="text-align: center; padding: 10px;">
-    <button onclick="resetChat()"
-      style="background: #eee; color: #333; padding: 8px 16px; border-radius: 6px; border: 1px solid #aaa; cursor: pointer;">
+  <div class="reset-button-container">
+    <button onclick="resetChat()" class="reset-button">
       Reset Chat
     </button>
+    <div class="timestamp"></div>
   </div>
 
   <!-- ⚠️ Reset Confirmation Modal -->
@@ -60,19 +74,82 @@
     const TESTING_MODE = true;
 
     if (TESTING_MODE) {
-      document.getElementById("testBanner").classList.remove("hidden");
+      const testBanner = document.getElementById("testBanner");
+      testBanner.classList.remove("hidden");
+      
+      // Check if running locally
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocalhost) {
+        testBanner.innerHTML += ' <strong>RUNNING LOCALLY</strong>';
+      }
     }
 
-    const input = document.getElementById("userInput");
     const chat = document.getElementById("chatBox");
+    let chatStartTime = null;
 
-    // Handle "Enter to Send"
-    input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        send();
+    // Function to handle sending messages
+    function handleSend(e) {
+      if (e) e.preventDefault();
+      const inputElement = document.getElementById("userInput");
+      if (!inputElement) return;
+      
+      const message = inputElement.value.trim();
+      if (!message) return;
+
+      // Remove any existing option bubbles
+      const optionContainers = document.querySelectorAll('.bot-option-container');
+      optionContainers.forEach(container => container.remove());
+
+      addMessage("user", message);
+      inputElement.value = "";
+      sendMessage(message);
+    }
+
+    // Function to send message to server
+    async function sendMessage(message) {
+      const threadId = localStorage.getItem("threadId");
+      console.log("Current thread ID:", threadId);
+
+      try {
+        showTyping();
+
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            message, 
+            threadId,
+            chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0
+          })
+        });
+
+        const data = await res.json();
+        console.log("Received response:", data);
+        hideTyping();
+
+        if (data.reply) {
+          document.getElementById("loadingOverlay").classList.add("hidden");
+          addMessage("bot", data.reply);
+          if (data.threadId) {
+            localStorage.setItem("threadId", data.threadId);
+            console.log("New thread ID saved:", data.threadId);
+          }
+          const history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+          history.push({ role: "user", text: message });
+          history.push({ role: "bot", text: data.reply });
+          localStorage.setItem("chatHistory", JSON.stringify(history));
+        } else {
+          console.error("No reply in response:", data);
+          addMessage("bot", "Sorry, something went wrong.");
+        }
+      } catch (err) {
+        hideTyping();
+        console.error("Error sending message:", err);
+        addMessage("bot", "Sorry, there was a problem connecting.");
       }
-    });
+
+      document.getElementById("userInput")?.focus();
+    }
 
     // Setup Modal Listeners ONCE
     const modal = document.getElementById("confirmModal");
@@ -81,27 +158,105 @@
       localStorage.removeItem("threadId");
       localStorage.removeItem("chatHistory");
       chat.innerHTML = '';
+      
+      // Restore input area to original state
+      const inputArea = document.getElementById("inputArea");
+      inputArea.innerHTML = `
+        <input id="userInput" type="text" placeholder="Ask something..." />
+        <button onclick="handleSend()">Send</button>
+      `;
+      inputArea.classList.remove("chat-ended");
+      
+      // Reattach event listeners
+      const newInput = document.getElementById("userInput");
+      if (newInput) {
+        newInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") handleSend(e);
+        });
+      }
+      
+      // Reset chat timer
+      chatStartTime = Date.now();
+      
       document.getElementById("loadingOverlay").classList.remove("hidden");
-      send("[[BEGIN-CHAT]]");
+      sendMessage("[[BEGIN-CHAT]]");
     };
     document.getElementById("confirmNo").onclick = function() {
       modal.classList.add("hidden");
     };
 
-    // Load Previous Chat if Exists
-    const savedThreadId = localStorage.getItem("threadId");
-    const savedMessages = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+    // Initialize chat when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM fully loaded, initializing chat...");
+      
+      // Setup initial event listeners
+      const inputElement = document.getElementById("userInput");
+      if (inputElement) {
+        inputElement.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") handleSend(e);
+        });
+      }
 
-    // Only load saved messages if we have a thread ID
-    if (savedThreadId && savedMessages.length > 0) {
-      savedMessages.forEach(({ role, text }) => addMessage(role, text));
-    } else {
-      // Clear any stale data and start fresh
-      localStorage.removeItem("threadId");
-      localStorage.removeItem("chatHistory");
-      document.getElementById("loadingOverlay").classList.remove("hidden");
-      setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
-    }
+      // Update timestamp
+      function updateTimestamp() {
+        const ukTime = new Date().toLocaleString("en-GB", {
+          timeZone: "Europe/London",
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+        document.querySelector('.timestamp').textContent = ukTime;
+      }
+      
+      // Update timestamp immediately and every minute
+      updateTimestamp();
+      setInterval(updateTimestamp, 60000);
+      
+      // Load Previous Chat if Exists
+      const savedThreadId = localStorage.getItem("threadId");
+      const savedMessages = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+
+      console.log("Initial load - Thread ID:", savedThreadId);
+      console.log("Initial load - Saved messages:", savedMessages);
+
+      // Only load saved messages if we have a thread ID
+      if (savedThreadId && savedMessages.length > 0) {
+        console.log("Loading existing chat...");
+        savedMessages.forEach(({ role, text }) => addMessage(role, text));
+      } else {
+        console.log("Starting new chat...");
+        // Clear any stale data and start fresh
+        localStorage.removeItem("threadId");
+        localStorage.removeItem("chatHistory");
+        document.getElementById("loadingOverlay").classList.remove("hidden");
+        
+        // Get current UK time
+        const ukTime = new Date().toLocaleString("en-GB", {
+          timeZone: "Europe/London",
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+        
+        console.log("Sending time to chatbot:", ukTime);
+        console.log("Raw date object:", new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }));
+        
+        // Start the chat timer
+        chatStartTime = Date.now();
+        
+        // Send initial message with hidden time info
+        sendMessage(`[[BEGIN-CHAT]] [[TIME:${ukTime}]]`);
+      }
+    });
+
+    // Make handleSend available globally
+    window.handleSend = handleSend;
 
     // Renderer for Markdown Links
     const renderer = new marked.Renderer();
@@ -113,53 +268,6 @@
     // ---------------------------
     // Functions
     // ---------------------------
-
-    async function send(msgOverride = null) {
-      const message = msgOverride || input.value.trim();
-      if (!message) return;
-
-      const isHiddenUserCommand = /^\[\[.*\]\]$/.test(message);
-
-      if (!msgOverride && !isHiddenUserCommand) {
-        addMessage("user", message);
-        input.value = "";
-      }
-
-      const threadId = localStorage.getItem("threadId");
-
-      try {
-        showTyping();
-
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, threadId })
-        });
-
-        const data = await res.json();
-        hideTyping();
-
-        if (data.reply) {
-          document.getElementById("loadingOverlay").classList.add("hidden");
-          addMessage("bot", data.reply);
-          if (data.threadId) {
-            localStorage.setItem("threadId", data.threadId);
-          }
-          const history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-          history.push({ role: "user", text: message });
-          history.push({ role: "bot", text: data.reply });
-          localStorage.setItem("chatHistory", JSON.stringify(history));
-        } else {
-          addMessage("bot", "Sorry, something went wrong.");
-        }
-      } catch (err) {
-        hideTyping();
-        console.error("Error sending message:", err);
-        addMessage("bot", "Sorry, there was a problem connecting.");
-      }
-
-      input.focus();
-    }
 
     function addMessage(role, text) {
       const container = document.createElement("div");
@@ -191,6 +299,12 @@
         const buttonRow = document.createElement("div");
         buttonRow.className = "bot-option-container";
 
+        // Add instructional text
+        const instructionText = document.createElement("div");
+        instructionText.className = "option-instruction";
+        instructionText.textContent = "You can click a button below or type your own message:";
+        buttonRow.appendChild(instructionText);
+
         matches.forEach(match => {
           const btnText = match[1];
           const btn = document.createElement("button");
@@ -198,7 +312,7 @@
           btn.className = "bot-option";
           btn.onclick = () => {
             addMessage("user", btnText);
-            send(btnText);
+            sendMessage(btnText);
             buttonRow.remove();
           };
           buttonRow.appendChild(btn);
@@ -209,7 +323,25 @@
 
       chat.appendChild(container);
       chat.scrollTop = chat.scrollHeight;
-      input.focus();
+      document.getElementById("userInput")?.focus();
+
+      // Check for END-CHAT command after displaying the message
+      if (text.toUpperCase().includes('[[END-CHAT]]')) {
+        const inputArea = document.getElementById("inputArea");
+        inputArea.innerHTML = `
+          <div class="chat-ended-message">
+            <div class="chat-ended-icon">✓</div>
+            <div class="chat-ended-text">The Chat has ended</div>
+          </div>
+        `;
+        inputArea.classList.add("chat-ended");
+
+        // Calculate final chat duration
+        const finalDuration = chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0;
+        
+        // Send final message with duration
+        sendMessage(`[[END-CHAT]] [[DURATION:${finalDuration}]]`);
+      }
     }
 
     function resetChat() {
@@ -226,6 +358,11 @@
       document.getElementById("typingIndicator").classList.remove("visible");
       document.getElementById("typingIndicator").classList.add("hidden");
       chat.classList.remove("typing-active");
+    }
+
+    // Add function to show input area
+    function showInputArea() {
+      document.getElementById("inputArea").classList.remove("hidden");
     }
   </script>
 
