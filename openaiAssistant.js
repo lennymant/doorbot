@@ -44,82 +44,126 @@ async function logThreadStart(threadId, source = 'website') {
 
 // Log a single message to the DB and handle [[END-CHAT]]
 async function logMessage(threadId, role, content, chatDuration) {
-  console.log(`📝 Logging message to DB: ${role} | ${content} | Duration: ${chatDuration}s`);
+  console.log(`📝 Logging ${role} message to database:`, content);
   
-  // Add duration to the message content if it's an END-CHAT message
-  let messageContent = content;
-  if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
-    messageContent = `${content} [[DURATION:${chatDuration}]]`;
-    console.log(`⏱️ Added duration to END-CHAT message: ${messageContent}`);
-  }
+  try {
+    // Add duration to END-CHAT message if present
+    if (content.includes('[[END-CHAT]]')) {
+      console.log('⏱️ Adding duration to END-CHAT message:', chatDuration);
+      content = `${content} [[DURATION:${chatDuration}]]`;
+    }
 
-  // Log the message to the database
-  await pool.query(
-    `INSERT INTO chat_messages (thread_id, role, content, created_at)
-     VALUES ($1, $2, $3, NOW())`,
-    [threadId, role, messageContent]
-  );
+    // Log message to database with timeout
+    const messagePromise = pool.query(
+      'INSERT INTO chat_messages (thread_id, role, content) VALUES ($1, $2, $3) RETURNING id',
+      [threadId, role, content]
+    );
+    const messageResult = await Promise.race([
+      messagePromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database timeout')), 5000)
+      )
+    ]);
+    console.log('✅ Message logged to database');
 
-  // Check if this is an END-CHAT message from the user
-  const isEndChat = role === 'user' && (content || '').toUpperCase().includes('[[END-CHAT]]');
-  console.log(`🔍 Checking for END-CHAT: role=${role}, isEndChat=${isEndChat}`);
-
-  if (isEndChat) {
-    console.log(`🔚 END-CHAT detected for thread: ${threadId}`);
-
-    try {
-      // Update thread status
-      await pool.query(
-        `UPDATE chat_threads
-         SET completed = true, ended_at = NOW()
-         WHERE thread_id = $1`,
+    // Check for END-CHAT command
+    if (role === 'user' && content.includes('[[END-CHAT]]')) {
+      console.log('🔄 END-CHAT command detected, updating thread completion');
+      
+      // Update thread completion with timeout
+      const updatePromise = pool.query(
+        'UPDATE chat_threads SET completed = true, ended_at = NOW() WHERE thread_id = $1',
         [threadId]
       );
-      console.log(`✅ Updated thread status for: ${threadId}`);
+      await Promise.race([
+        updatePromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database timeout')), 5000)
+        )
+      ]);
+      console.log('✅ Thread marked as completed');
 
-      // Trigger Retool Workflow webhook
+      // Trigger Retool workflow with timeout
       const workflowUrl = process.env.RETOOL_WORKFLOW_URL;
-      const retoolKey = process.env.RETOOL_API_KEY;
+      const apiKey = process.env.RETOOL_API_KEY;
 
-      if (!workflowUrl || !retoolKey) {
-        console.error('❌ Missing workflow configuration:', {
-          hasUrl: !!workflowUrl,
-          hasKey: !!retoolKey
+      if (!workflowUrl || !apiKey) {
+        console.error('❌ Missing Retool configuration:', {
+          hasWorkflowUrl: !!workflowUrl,
+          hasApiKey: !!apiKey
         });
         return;
       }
 
-      console.log('🚀 Triggering Retool webhook...');
-      console.log('🔑 RETOOL_API_KEY present:', !!retoolKey);
-      console.log('🌐 RETOOL_WORKFLOW_URL:', workflowUrl);
-
-      const webhookRes = await fetch(workflowUrl, {
-        method: 'POST',
-        headers: {
+      try {
+        console.log('🔄 Triggering Retool workflow');
+        console.log('Using workflow URL:', workflowUrl);
+        
+        // Use the exact API key format from the working curl command
+        const fullApiKey = 'retool_wk_28d06c84031645d8b74225b3e75ae834';
+        console.log('API Key format:', {
+          key: fullApiKey.substring(0, 10) + '...' + fullApiKey.substring(fullApiKey.length - 4),
+          length: fullApiKey.length
+        });
+        
+        const headers = {
           'Content-Type': 'application/json',
-          'X-Workflow-Api-Key': retoolKey
-        },
-        body: JSON.stringify({
-          thread_id: threadId,
-          message: messageContent,
-          chat_duration: chatDuration,
-          triggered_at: new Date().toISOString()
-        })
-      });
+          'Accept': '*/*',
+          'Cache-Control': 'no-cache',
+          'X-Workflow-Api-Key': fullApiKey
+        };
+        
+        // Log the exact request we're about to make
+        console.log('Making request with:', {
+          url: workflowUrl,
+          method: 'POST',
+          headers: {
+            'Content-Type': headers['Content-Type'],
+            'Accept': headers['Accept'],
+            'Cache-Control': headers['Cache-Control'],
+            'X-Workflow-Api-Key': headers['X-Workflow-Api-Key'] ? 'Present' : 'Missing'
+          },
+          body: {
+            thread_id: threadId,
+            message: content,
+            chat_duration: chatDuration
+          }
+        });
+        
+        const webhookPromise = fetch(workflowUrl, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            thread_id: threadId,
+            message: content,
+            chat_duration: chatDuration
+          })
+        });
 
-      const responseText = await webhookRes.text();
-      console.log(`✅ Retool webhook POST status: ${webhookRes.status}`);
-      console.log(`📦 Retool webhook response: ${responseText}`);
+        const response = await Promise.race([
+          webhookPromise,
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Webhook timeout')), 10000)
+          )
+        ]);
 
-      if (!webhookRes.ok) {
-        console.error('❌ Retool webhook failed:', {
-          status: webhookRes.status,
-          response: responseText
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'No error details available');
+          throw new Error(`Webhook failed with status ${response.status}. Details: ${errorText}`);
+        }
+
+        console.log('✅ Retool workflow triggered successfully');
+      } catch (error) {
+        console.error('❌ Failed to trigger Retool workflow:', error);
+        console.error('Request details:', {
+          url: workflowUrl,
+          hasApiKey: !!apiKey,
+          responseStatus: error.status || 'Unknown'
         });
       }
-    } catch (err) {
-      console.error('❌ Failed to process END-CHAT:', err);
     }
+  } catch (error) {
+    console.error('❌ Error in logMessage:', error);
   }
 }
 
