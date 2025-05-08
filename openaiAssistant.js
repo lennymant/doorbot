@@ -50,30 +50,45 @@ async function logMessage(threadId, role, content, chatDuration) {
   let messageContent = content;
   if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
     messageContent = `${content} [[DURATION:${chatDuration}]]`;
+    console.log(`⏱️ Added duration to END-CHAT message: ${messageContent}`);
   }
 
+  // Log the message to the database
   await pool.query(
     `INSERT INTO chat_messages (thread_id, role, content, created_at)
      VALUES ($1, $2, $3, NOW())`,
     [threadId, role, messageContent]
   );
 
-  // Only trigger END-CHAT workflow if this is a user message containing END-CHAT
-  if (role === 'user' && (content || '').toUpperCase().includes('[[END-CHAT]]')) {
+  // Check if this is an END-CHAT message from the user
+  const isEndChat = role === 'user' && (content || '').toUpperCase().includes('[[END-CHAT]]');
+  console.log(`🔍 Checking for END-CHAT: role=${role}, isEndChat=${isEndChat}`);
+
+  if (isEndChat) {
     console.log(`🔚 END-CHAT detected for thread: ${threadId}`);
 
-    await pool.query(
-      `UPDATE chat_threads
-       SET completed = true, ended_at = NOW()
-       WHERE thread_id = $1`,
-      [threadId]
-    );
-
-    // Trigger Retool Workflow webhook
-    const workflowUrl = process.env.RETOOL_WORKFLOW_URL;
-    const retoolKey = process.env.RETOOL_API_KEY;
-
     try {
+      // Update thread status
+      await pool.query(
+        `UPDATE chat_threads
+         SET completed = true, ended_at = NOW()
+         WHERE thread_id = $1`,
+        [threadId]
+      );
+      console.log(`✅ Updated thread status for: ${threadId}`);
+
+      // Trigger Retool Workflow webhook
+      const workflowUrl = process.env.RETOOL_WORKFLOW_URL;
+      const retoolKey = process.env.RETOOL_API_KEY;
+
+      if (!workflowUrl || !retoolKey) {
+        console.error('❌ Missing workflow configuration:', {
+          hasUrl: !!workflowUrl,
+          hasKey: !!retoolKey
+        });
+        return;
+      }
+
       console.log('🚀 Triggering Retool webhook...');
       console.log('🔑 RETOOL_API_KEY present:', !!retoolKey);
       console.log('🌐 RETOOL_WORKFLOW_URL:', workflowUrl);
@@ -95,8 +110,15 @@ async function logMessage(threadId, role, content, chatDuration) {
       const responseText = await webhookRes.text();
       console.log(`✅ Retool webhook POST status: ${webhookRes.status}`);
       console.log(`📦 Retool webhook response: ${responseText}`);
+
+      if (!webhookRes.ok) {
+        console.error('❌ Retool webhook failed:', {
+          status: webhookRes.status,
+          response: responseText
+        });
+      }
     } catch (err) {
-      console.error('❌ Failed to trigger Retool webhook:', err);
+      console.error('❌ Failed to process END-CHAT:', err);
     }
   }
 }
@@ -125,11 +147,47 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
   });
 
   let runStatus = 'queued';
-  while (runStatus !== 'completed') {
+  let attempts = 0;
+  const maxAttempts = 60; // 60 seconds timeout
+
+  while (runStatus !== 'completed' && attempts < maxAttempts) {
     await new Promise(r => setTimeout(r, 1000));
     const status = await openai.beta.threads.runs.retrieve(threadId, run.id);
     runStatus = status.status;
-    console.log(`⏱️ Assistant run status: ${runStatus}`);
+    attempts++;
+    
+    console.log(`⏱️ Assistant run status: ${runStatus} (Attempt ${attempts}/${maxAttempts})`);
+    
+    if (runStatus === 'expired' || runStatus === 'failed') {
+      console.error(`❌ Run ${run.id} ${runStatus}. Last status:`, status);
+      
+      // Try to get the last message even if the run expired
+      try {
+        const messages = await openai.beta.threads.messages.list(threadId);
+        const lastAssistantMessage = messages.data.find(m => m.role === 'assistant');
+        if (lastAssistantMessage) {
+          const assistantReply = lastAssistantMessage?.content?.[0]?.text?.value;
+          console.log(`📝 Found last assistant message despite ${runStatus}:`, assistantReply);
+          await logMessage(threadId, 'assistant', assistantReply, chatDuration);
+          return { threadId, reply: assistantReply };
+        }
+      } catch (err) {
+        console.error('❌ Failed to retrieve last message:', err);
+      }
+      
+      return { 
+        threadId, 
+        reply: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment." 
+      };
+    }
+  }
+
+  if (attempts >= maxAttempts) {
+    console.error(`❌ Run ${run.id} timed out after ${maxAttempts} seconds`);
+    return { 
+      threadId, 
+      reply: "I apologize, but I'm taking longer than expected to respond. Please try again in a moment." 
+    };
   }
 
   const messages = await openai.beta.threads.messages.list(threadId);
