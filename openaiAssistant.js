@@ -43,12 +43,12 @@ async function logThreadStart(threadId, source = 'website') {
 }
 
 // Log a single message to the DB and handle [[END-CHAT]]
-async function logMessage(threadId, role, content) {
-  console.log(`📝 Logging message to DB: ${role} | ${content}`);
+async function logMessage(threadId, role, content, chatDuration) {
+  console.log(`📝 Logging message to DB: ${role} | ${content} | Duration: ${chatDuration}s`);
   await pool.query(
-    `INSERT INTO chat_messages (thread_id, role, content, created_at)
-     VALUES ($1, $2, $3, NOW())`,
-    [threadId, role, content]
+    `INSERT INTO chat_messages (thread_id, role, content, created_at, chat_duration)
+     VALUES ($1, $2, $3, NOW(), $4)`,
+    [threadId, role, content, chatDuration]
   );
 
   if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
@@ -56,9 +56,9 @@ async function logMessage(threadId, role, content) {
 
     await pool.query(
       `UPDATE chat_threads
-       SET completed = true, ended_at = NOW()
+       SET completed = true, ended_at = NOW(), duration_seconds = $2
        WHERE thread_id = $1`,
-      [threadId]
+      [threadId, chatDuration]
     );
 
     // Trigger Retool Workflow webhook
@@ -79,6 +79,7 @@ async function logMessage(threadId, role, content) {
         body: JSON.stringify({
           thread_id: threadId,
           message: content,
+          chat_duration: chatDuration,
           triggered_at: new Date().toISOString()
         })
       });
@@ -93,7 +94,7 @@ async function logMessage(threadId, role, content) {
 }
 
 // Full assistant interaction
-async function handleChatMessage({ userMessage, threadId }) {
+async function handleChatMessage({ userMessage, threadId, chatDuration }) {
   if (!threadId) {
     const thread = await openai.beta.threads.create();
     threadId = thread.id;
@@ -108,7 +109,7 @@ async function handleChatMessage({ userMessage, threadId }) {
     role: 'user',
     content: userMessage
   });
-  await logMessage(threadId, 'user', userMessage);
+  await logMessage(threadId, 'user', userMessage, chatDuration);
 
   console.log(`⚙️ Starting assistant run on thread: ${threadId}`);
   const run = await openai.beta.threads.runs.create(threadId, {
@@ -128,7 +129,7 @@ async function handleChatMessage({ userMessage, threadId }) {
   const assistantReply = lastAssistantMessage?.content?.[0]?.text?.value || 'Sorry, I wasn\'t able to generate a response.';
 
   console.log(`🤖 Assistant replied: ${assistantReply}`);
-  await logMessage(threadId, 'assistant', assistantReply);
+  await logMessage(threadId, 'assistant', assistantReply, chatDuration);
 
   return { threadId, reply: assistantReply };
 }

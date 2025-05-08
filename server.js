@@ -12,14 +12,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.post('/chat', async (req, res) => {
-  const { message, threadId } = req.body;
+  const { message, threadId, chatDuration } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'Message required' });
   }
 
   try {
-    const result = await handleChatMessage({ userMessage: message, threadId });
+    const result = await handleChatMessage({ 
+      userMessage: message, 
+      threadId,
+      chatDuration 
+    });
     res.json(result);
   } catch (err) {
     console.error('Chat error:', err);
