@@ -92,9 +92,13 @@
     const savedThreadId = localStorage.getItem("threadId");
     const savedMessages = JSON.parse(localStorage.getItem("chatHistory") || "[]");
 
-    savedMessages.forEach(({ role, text }) => addMessage(role, text));
-
-    if (!savedThreadId && savedMessages.length === 0) {
+    // Only load saved messages if we have a thread ID
+    if (savedThreadId && savedMessages.length > 0) {
+      savedMessages.forEach(({ role, text }) => addMessage(role, text));
+    } else {
+      // Clear any stale data and start fresh
+      localStorage.removeItem("threadId");
+      localStorage.removeItem("chatHistory");
       document.getElementById("loadingOverlay").classList.remove("hidden");
       setTimeout(() => send("[[BEGIN-CHAT]]"), 100);
     }
