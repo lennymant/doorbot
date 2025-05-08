@@ -3,6 +3,10 @@
   function init() {
     const CHATBOT_URL = "https://doorbot.onrender.com"; // <-- your working chatbot
   
+    // Check for URL parameter to open chat
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldOpenChat = urlParams.get('openchat') === 'true';
+
     // Floating button
     const button = document.createElement("div");
     button.innerText = "💬 Chat with Mac";
@@ -171,6 +175,7 @@
       overlay.offsetHeight;
       overlay.style.opacity = "1";
       document.body.style.overflow = "hidden";
+      button.style.display = "none"; // Hide the button when chat is open
       
       // Show mobile close button on small screens
       if (window.innerWidth <= 768) {
@@ -184,6 +189,7 @@
         overlay.style.display = "none";
         document.body.style.overflow = "";
         mobileCloseButton.style.display = "none";
+        button.style.display = "block"; // Show the button again when chat is closed
         // Reset iframe
         iframe.style.opacity = "0";
         spinner.style.display = "block";
@@ -213,6 +219,16 @@
     overlay.appendChild(mobileCloseButton);
     overlay.appendChild(spinner);
     document.body.appendChild(overlay);
+
+    // If URL parameter is present, open chat automatically
+    if (shouldOpenChat) {
+      button.click();
+    }
+
+    // Add function to window for external access
+    window.openDoorbotChat = function() {
+      button.click();
+    };
   }
 
   // Check if DOM is already loaded
