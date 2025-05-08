@@ -10,6 +10,12 @@ const path = require('path');
 // Serve everything in /public (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Add route for widget.js
+app.get("/widget.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow any website to use the widget
+  res.sendFile(path.join(__dirname, "public", "widget.js"));
+});
 
 app.post('/chat', async (req, res) => {
   const { message, threadId, chatDuration } = req.body;
