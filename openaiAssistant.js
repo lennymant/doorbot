@@ -58,7 +58,8 @@ async function logMessage(threadId, role, content, chatDuration) {
     [threadId, role, messageContent]
   );
 
-  if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
+  // Only trigger END-CHAT workflow if this is a user message containing END-CHAT
+  if (role === 'user' && (content || '').toUpperCase().includes('[[END-CHAT]]')) {
     console.log(`🔚 END-CHAT detected for thread: ${threadId}`);
 
     await pool.query(
