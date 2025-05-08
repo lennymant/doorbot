@@ -113,11 +113,26 @@
       try {
         showTyping();
 
+        // Only add time to BEGIN-CHAT message
+        let messageToSend = message;
+        if (message.includes("[[BEGIN-CHAT]]")) {
+          const ukTime = new Date().toLocaleString("en-GB", {
+            timeZone: "Europe/London",
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+          });
+          messageToSend = `${message} [[TIME:${ukTime}]]`;
+        }
+
         const res = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
-            message, 
+            message: messageToSend, 
             threadId,
             chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0
           })
@@ -178,8 +193,19 @@
       // Reset chat timer
       chatStartTime = Date.now();
       
+      // Get current UK time
+      const ukTime = new Date().toLocaleString("en-GB", {
+        timeZone: "Europe/London",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      
       document.getElementById("loadingOverlay").classList.remove("hidden");
-      sendMessage("[[BEGIN-CHAT]]");
+      sendMessage(`[[BEGIN-CHAT]] [[TIME:${ukTime}]]`);
     };
     document.getElementById("confirmNo").onclick = function() {
       modal.classList.add("hidden");
