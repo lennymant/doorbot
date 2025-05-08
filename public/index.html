@@ -335,12 +335,6 @@
           </div>
         `;
         inputArea.classList.add("chat-ended");
-
-        // Calculate final chat duration
-        const finalDuration = chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0;
-        
-        // Send final message with duration
-        sendMessage(`[[END-CHAT]] [[DURATION:${finalDuration}]]`);
       }
     }
 
