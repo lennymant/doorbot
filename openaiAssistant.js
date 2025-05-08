@@ -45,10 +45,17 @@ async function logThreadStart(threadId, source = 'website') {
 // Log a single message to the DB and handle [[END-CHAT]]
 async function logMessage(threadId, role, content, chatDuration) {
   console.log(`📝 Logging message to DB: ${role} | ${content} | Duration: ${chatDuration}s`);
+  
+  // Add duration to the message content if it's an END-CHAT message
+  let messageContent = content;
+  if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
+    messageContent = `${content} [[DURATION:${chatDuration}]]`;
+  }
+
   await pool.query(
-    `INSERT INTO chat_messages (thread_id, role, content, created_at, chat_duration)
-     VALUES ($1, $2, $3, NOW(), $4)`,
-    [threadId, role, content, chatDuration]
+    `INSERT INTO chat_messages (thread_id, role, content, created_at)
+     VALUES ($1, $2, $3, NOW())`,
+    [threadId, role, messageContent]
   );
 
   if ((content || '').toUpperCase().includes('[[END-CHAT]]')) {
@@ -56,9 +63,9 @@ async function logMessage(threadId, role, content, chatDuration) {
 
     await pool.query(
       `UPDATE chat_threads
-       SET completed = true, ended_at = NOW(), duration_seconds = $2
+       SET completed = true, ended_at = NOW()
        WHERE thread_id = $1`,
-      [threadId, chatDuration]
+      [threadId]
     );
 
     // Trigger Retool Workflow webhook
@@ -78,7 +85,7 @@ async function logMessage(threadId, role, content, chatDuration) {
         },
         body: JSON.stringify({
           thread_id: threadId,
-          message: content,
+          message: messageContent,
           chat_duration: chatDuration,
           triggered_at: new Date().toISOString()
         })
