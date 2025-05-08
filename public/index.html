@@ -245,12 +245,11 @@
         });
         
         console.log("Sending time to chatbot:", ukTime);
-        console.log("Raw date object:", new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }));
         
         // Start the chat timer
         chatStartTime = Date.now();
         
-        // Send initial message with hidden time info
+        // Send initial message with time info
         sendMessage(`[[BEGIN-CHAT]] [[TIME:${ukTime}]]`);
       }
     });
