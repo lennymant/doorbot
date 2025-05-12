@@ -18,7 +18,7 @@ app.get("/widget.js", (req, res) => {
 });
 
 app.post('/chat', async (req, res) => {
-  const { message, threadId, chatDuration } = req.body;
+  const { message, threadId, chatDuration, botType } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'Message required' });
@@ -28,7 +28,8 @@ app.post('/chat', async (req, res) => {
     const result = await handleChatMessage({ 
       userMessage: message, 
       threadId,
-      chatDuration 
+      chatDuration,
+      botType 
     });
     res.json(result);
   } catch (err) {

@@ -84,6 +84,10 @@
       }
     }
 
+    // Get bot type from URL query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const botType = urlParams.get('bot');
+
     const chat = document.getElementById("chatBox");
     let chatStartTime = null;
 
@@ -128,14 +132,23 @@
           messageToSend = `${message} [[TIME:${ukTime}]]`;
         }
 
+        // Add bot type to request if this is a new thread
+        const isNewThread = !threadId;
+        const requestBody = {
+          message: messageToSend,
+          threadId,
+          chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0
+        };
+        
+        // Only include bot type for new threads
+        if (isNewThread && botType) {
+          requestBody.botType = botType;
+        }
+
         const res = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            message: messageToSend, 
-            threadId,
-            chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0
-          })
+          body: JSON.stringify(requestBody)
         });
 
         const data = await res.json();

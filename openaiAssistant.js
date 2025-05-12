@@ -6,6 +6,18 @@ const fetch = require('node-fetch');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Map bot types to assistant IDs
+const BOT_ASSISTANTS = {
+  default: process.env.ASSISTANT_ID_DEFAULT,
+  candidate: process.env.ASSISTANT_ID_CANDIDATE
+};
+
+// Map bot types to bot names
+const BOT_NAMES = {
+  default: process.env.BOT_NAME_DEFAULT || 'Mac',
+  candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant'
+};
+
 const pool = new Pool({
   connectionString: process.env.RETOOL_DB_URL,
   ssl: { rejectUnauthorized: false }
@@ -168,7 +180,12 @@ async function logMessage(threadId, role, content, chatDuration) {
 }
 
 // Full assistant interaction
-async function handleChatMessage({ userMessage, threadId, chatDuration }) {
+async function handleChatMessage({ userMessage, threadId, chatDuration, botType }) {
+  // Get assistant ID and name based on bot type (only for new threads)
+  const currentBotType = (!threadId && botType) ? botType : 'default';
+  const assistantId = BOT_ASSISTANTS[currentBotType] || BOT_ASSISTANTS.default;
+  const botName = BOT_NAMES[currentBotType] || BOT_NAMES.default;
+  
   if (!threadId) {
     const thread = await openai.beta.threads.create();
     threadId = thread.id;
@@ -185,9 +202,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
   });
   await logMessage(threadId, 'user', userMessage, chatDuration);
 
-  console.log(`⚙️ Starting assistant run on thread: ${threadId}`);
+  console.log(`⚙️ Starting assistant run on thread: ${threadId} with assistant: ${assistantId}`);
   const run = await openai.beta.threads.runs.create(threadId, {
-    assistant_id: process.env.ASSISTANT_ID
+    assistant_id: assistantId
   });
 
   let runStatus = 'queued';
@@ -213,7 +230,11 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
           const assistantReply = lastAssistantMessage?.content?.[0]?.text?.value;
           console.log(`📝 Found last assistant message despite ${runStatus}:`, assistantReply);
           await logMessage(threadId, 'assistant', assistantReply, chatDuration);
-          return { threadId, reply: assistantReply };
+          return { 
+            threadId, 
+            reply: assistantReply,
+            botName
+          };
         }
       } catch (err) {
         console.error('❌ Failed to retrieve last message:', err);
@@ -221,7 +242,8 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
       
       return { 
         threadId, 
-        reply: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment." 
+        reply: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
+        botName
       };
     }
   }
@@ -230,7 +252,8 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
     console.error(`❌ Run ${run.id} timed out after ${maxAttempts} seconds`);
     return { 
       threadId, 
-      reply: "I apologize, but I'm taking longer than expected to respond. Please try again in a moment." 
+      reply: "I apologize, but I'm taking longer than expected to respond. Please try again in a moment.",
+      botName
     };
   }
 
@@ -241,7 +264,11 @@ async function handleChatMessage({ userMessage, threadId, chatDuration }) {
   console.log(`🤖 Assistant replied: ${assistantReply}`);
   await logMessage(threadId, 'assistant', assistantReply, chatDuration);
 
-  return { threadId, reply: assistantReply };
+  return { 
+    threadId, 
+    reply: assistantReply,
+    botName
+  };
 }
 
 module.exports = { handleChatMessage };
