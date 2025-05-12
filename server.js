@@ -10,6 +10,26 @@ const path = require('path');
 // Serve everything in /public (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- NEW: API Endpoint for Bot Configuration ---
+app.get('/api/v1/bot-config', (req, res) => {
+  try {
+    // Construct the map from environment variables
+    // IMPORTANT: Add keys here for *all* your bot types (e.g., 'mikes')
+    // and ensure corresponding BOT_NAME_... variables exist in .env
+    const botNamesMap = {
+      default: process.env.BOT_NAME_DEFAULT || 'Mac', // Fallback if env var missing
+      candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant', // Fallback
+      // mikes: process.env.BOT_NAME_MIKES || 'Mike S', // Keep this commented if Mike S is not one of the two
+    };
+    console.log('Sending bot config:', botNamesMap); // Log for debugging
+    res.json(botNamesMap);
+  } catch (error) {
+    console.error('Error fetching bot config:', error);
+    res.status(500).json({ error: 'Failed to load bot configuration' });
+  }
+});
+// --- END NEW Endpoint ---
+
 // Add route for widget.js
 app.get("/widget.js", (req, res) => {
   res.setHeader("Content-Type", "application/javascript");

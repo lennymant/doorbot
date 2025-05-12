@@ -81,9 +81,9 @@ async function logMessage(threadId, role, content, chatDuration) {
     ]);
     console.log('✅ Message logged to database');
 
-    // Check for END-CHAT command
-    if (role === 'user' && content.includes('[[END-CHAT]]')) {
-      console.log('🔄 END-CHAT command detected, updating thread completion');
+    // Check for END-CHAT command from assistant
+    if (role === 'assistant' && content.includes('[[END-CHAT]]')) {
+      console.log('🔄 END-CHAT command detected from assistant, updating thread completion and triggering workflow');
       
       // Update thread completion with timeout
       const updatePromise = pool.query(
@@ -115,10 +115,10 @@ async function logMessage(threadId, role, content, chatDuration) {
         console.log('Using workflow URL:', workflowUrl);
         
         // Use the exact API key format from the working curl command
-        const fullApiKey = 'retool_wk_28d06c84031645d8b74225b3e75ae834';
+        const fullApiKey = apiKey;
         console.log('API Key format:', {
-          key: fullApiKey.substring(0, 10) + '...' + fullApiKey.substring(fullApiKey.length - 4),
-          length: fullApiKey.length
+          key: fullApiKey ? fullApiKey.substring(0, 10) + '...' + fullApiKey.substring(fullApiKey.length - 4) : 'Not Set',
+          length: fullApiKey ? fullApiKey.length : 0
         });
         
         const headers = {
@@ -151,7 +151,10 @@ async function logMessage(threadId, role, content, chatDuration) {
           body: JSON.stringify({
             thread_id: threadId,
             message: content,
-            chat_duration: chatDuration
+            chat_duration: chatDuration,
+            botType: {
+              type: threadBotTypes.get(threadId) || 'default'
+            }
           })
         });
 
@@ -184,18 +187,21 @@ async function logMessage(threadId, role, content, chatDuration) {
 
 // Full assistant interaction
 async function handleChatMessage({ userMessage, threadId, chatDuration, botType }) {
+  // Clean bot type by removing any query parameters
+  const cleanBotType = botType ? botType.split('?')[0] : 'default';
+  
   // Get or store bot type for this thread
-  if (!threadId && botType) {
+  if (!threadId && cleanBotType) {
     // New thread - store the bot type
-    console.log(`New thread with bot type: ${botType}`);
-  } else if (threadId && !threadBotTypes.has(threadId) && botType) {
+    console.log(`New thread with bot type: ${cleanBotType}`);
+  } else if (threadId && !threadBotTypes.has(threadId) && cleanBotType) {
     // Existing thread but no stored type - store it
-    console.log(`Storing bot type ${botType} for thread ${threadId}`);
-    threadBotTypes.set(threadId, botType);
+    console.log(`Storing bot type ${cleanBotType} for thread ${threadId}`);
+    threadBotTypes.set(threadId, cleanBotType);
   }
   
   // Get the bot type for this thread
-  const currentBotType = threadId ? (threadBotTypes.get(threadId) || 'default') : (botType || 'default');
+  const currentBotType = threadId ? (threadBotTypes.get(threadId) || 'default') : (cleanBotType || 'default');
   console.log(`Using bot type: ${currentBotType} for thread: ${threadId}`);
   
   const assistantId = BOT_ASSISTANTS[currentBotType] || BOT_ASSISTANTS.default;
@@ -206,8 +212,8 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
     threadId = thread.id;
     console.log(`✨ Created new OpenAI thread: ${threadId}`);
     // Store the bot type for new thread
-    if (botType) {
-      threadBotTypes.set(threadId, botType);
+    if (cleanBotType) {
+      threadBotTypes.set(threadId, cleanBotType);
     }
     await logThreadStart(threadId);
   }
