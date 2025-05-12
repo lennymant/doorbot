@@ -18,6 +18,9 @@ const BOT_NAMES = {
   candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant'
 };
 
+// Store thread to bot type mapping
+const threadBotTypes = new Map();
+
 const pool = new Pool({
   connectionString: process.env.RETOOL_DB_URL,
   ssl: { rejectUnauthorized: false }
@@ -181,8 +184,20 @@ async function logMessage(threadId, role, content, chatDuration) {
 
 // Full assistant interaction
 async function handleChatMessage({ userMessage, threadId, chatDuration, botType }) {
-  // Get assistant ID and name based on bot type (only for new threads)
-  const currentBotType = (!threadId && botType) ? botType : 'default';
+  // Get or store bot type for this thread
+  if (!threadId && botType) {
+    // New thread - store the bot type
+    console.log(`New thread with bot type: ${botType}`);
+  } else if (threadId && !threadBotTypes.has(threadId) && botType) {
+    // Existing thread but no stored type - store it
+    console.log(`Storing bot type ${botType} for thread ${threadId}`);
+    threadBotTypes.set(threadId, botType);
+  }
+  
+  // Get the bot type for this thread
+  const currentBotType = threadId ? (threadBotTypes.get(threadId) || 'default') : (botType || 'default');
+  console.log(`Using bot type: ${currentBotType} for thread: ${threadId}`);
+  
   const assistantId = BOT_ASSISTANTS[currentBotType] || BOT_ASSISTANTS.default;
   const botName = BOT_NAMES[currentBotType] || BOT_NAMES.default;
   
@@ -190,6 +205,10 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
     const thread = await openai.beta.threads.create();
     threadId = thread.id;
     console.log(`✨ Created new OpenAI thread: ${threadId}`);
+    // Store the bot type for new thread
+    if (botType) {
+      threadBotTypes.set(threadId, botType);
+    }
     await logThreadStart(threadId);
   }
 
@@ -233,7 +252,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
           return { 
             threadId, 
             reply: assistantReply,
-            botName
+            botName,
+            assistantId,
+            botType: currentBotType
           };
         }
       } catch (err) {
@@ -243,7 +264,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
       return { 
         threadId, 
         reply: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
-        botName
+        botName,
+        assistantId,
+        botType: currentBotType
       };
     }
   }
@@ -253,7 +276,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
     return { 
       threadId, 
       reply: "I apologize, but I'm taking longer than expected to respond. Please try again in a moment.",
-      botName
+      botName,
+      assistantId,
+      botType: currentBotType
     };
   }
 
@@ -267,7 +292,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
   return { 
     threadId, 
     reply: assistantReply,
-    botName
+    botName,
+    assistantId,
+    botType: currentBotType
   };
 }
 

@@ -31,6 +31,7 @@ app.post('/chat', async (req, res) => {
       chatDuration,
       botType 
     });
+    console.log('Chat response:', result); // Debug log
     res.json(result);
   } catch (err) {
     console.error('Chat error:', err);
