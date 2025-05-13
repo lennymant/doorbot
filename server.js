@@ -28,7 +28,17 @@ app.get('/api/v1/bot-config', (req, res) => {
     res.status(500).json({ error: 'Failed to load bot configuration' });
   }
 });
-// --- END NEW Endpoint ---
+
+// Add endpoint to serve chatbot URL
+app.get('/api/v1/chatbot-url', (req, res) => {
+  try {
+    const chatbotUrl = process.env.CHATBOT_URL || 'https://doorbot.onrender.com';
+    res.json({ url: chatbotUrl });
+  } catch (error) {
+    console.error('Error fetching chatbot URL:', error);
+    res.status(500).json({ error: 'Failed to load chatbot URL' });
+  }
+});
 
 // Add route for widget.js
 app.get("/widget.js", (req, res) => {

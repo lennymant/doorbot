@@ -1,7 +1,47 @@
 // Self-executing function that checks if DOM is ready
 (function() {
-  function init() {
-    const CHATBOT_URL = "https://doorbot.onrender.com"; // <-- your working chatbot
+  async function init() {
+    // Get the script tag
+    const script = document.currentScript || document.querySelector('script[src*="widget.js"]');
+    
+    // Get base URL from server or use override from script attribute
+    let baseUrl;
+    try {
+      // Get the current script's src to determine API endpoint
+      const scriptSrc = script.src;
+      const apiBase = scriptSrc.substring(0, scriptSrc.indexOf('/widget.js'));
+      const response = await fetch(`${apiBase}/api/v1/chatbot-url`);
+      const data = await response.json();
+      baseUrl = script.getAttribute('data-chatbot-url') || data.url;
+    } catch (e) {
+      console.warn('Failed to fetch chatbot URL from server:', e);
+      baseUrl = script.getAttribute('data-chatbot-url') || "https://doorbot.onrender.com";
+    }
+    
+    // Get additional parameters
+    const botType = script.getAttribute('data-bot-type');
+    const params = new URLSearchParams();
+    
+    // Add bot type if specified
+    if (botType) {
+      params.append('botType', botType);
+    }
+    
+    // Allow for additional custom parameters
+    const customParams = script.getAttribute('data-params');
+    if (customParams) {
+      try {
+        const additionalParams = JSON.parse(customParams);
+        Object.entries(additionalParams).forEach(([key, value]) => {
+          params.append(key, value);
+        });
+      } catch (e) {
+        console.warn('Invalid data-params format:', e);
+      }
+    }
+    
+    // Construct final URL
+    const CHATBOT_URL = `${baseUrl}${params.toString() ? '?' + params.toString() : ''}`;
   
     // Check for URL parameter to open chat
     const urlParams = new URLSearchParams(window.location.search);
@@ -233,9 +273,11 @@
 
   // Check if DOM is already loaded
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", () => {
+      init().catch(e => console.error('Failed to initialize widget:', e));
+    });
   } else {
-    init();
+    init().catch(e => console.error('Failed to initialize widget:', e));
   }
 })();
   
