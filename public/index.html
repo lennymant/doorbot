@@ -132,18 +132,13 @@
           messageToSend = `${message} [[TIME:${ukTime}]]`;
         }
 
-        // Add bot type to request if this is a new thread
-        const isNewThread = !threadId;
+        // Add bot type to request
         const requestBody = {
           message: messageToSend,
           threadId,
-          chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0
+          chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0,
+          botType: botType // Always send bot type
         };
-        
-        // Only include bot type for new threads
-        if (isNewThread && botType) {
-          requestBody.botType = botType;
-        }
 
         const res = await fetch("/chat", {
           method: "POST",
@@ -157,7 +152,7 @@
 
         if (data.reply) {
           document.getElementById("loadingOverlay").classList.add("hidden");
-          addMessage("bot", data.reply);
+          addMessage("bot", data.reply, data.assistantId);
           if (data.threadId) {
             localStorage.setItem("threadId", data.threadId);
             console.log("New thread ID saved:", data.threadId);
@@ -218,7 +213,9 @@
       });
       
       document.getElementById("loadingOverlay").classList.remove("hidden");
-      sendMessage(`[[BEGIN-CHAT]] [[TIME:${ukTime}]]`);
+      // Add bot type to BEGIN-CHAT message
+      const botParam = botType ? ` [[BOT:${botType}]]` : '';
+      sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
     };
     document.getElementById("confirmNo").onclick = function() {
       modal.classList.add("hidden");
@@ -288,8 +285,9 @@
         // Start the chat timer
         chatStartTime = Date.now();
         
-        // Send initial message with time info
-        sendMessage(`[[BEGIN-CHAT]] [[TIME:${ukTime}]]`);
+        // Send initial message with time info and bot type
+        const botParam = botType ? ` [[BOT:${botType}]]` : '';
+        sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
       }
     });
 
