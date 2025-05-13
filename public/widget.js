@@ -15,7 +15,7 @@
       baseUrl = script.getAttribute('data-chatbot-url') || data.url;
     } catch (e) {
       console.warn('Failed to fetch chatbot URL from server:', e);
-      baseUrl = script.getAttribute('data-chatbot-url') || "https://doorbot.onrender.com";
+      baseUrl = script.getAttribute('data-chatbot-url') || "https://sandbox.preview3.co.uk";
     }
     
     // Get additional parameters
