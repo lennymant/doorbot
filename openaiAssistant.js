@@ -47,13 +47,16 @@ async function waitForRunCompletion(threadId) {
 }
 
 // Log a new chat thread to the DB
-async function logThreadStart(threadId, source = 'website') {
+async function logThreadStart(threadId, source = 'website', botType = 'default') {
   console.log(`🧵 Creating thread record for: ${threadId}`);
+  const assistantId = BOT_ASSISTANTS[botType] || BOT_ASSISTANTS.default;
+  console.log(`Using assistant ID: ${assistantId} for bot type: ${botType}`);
   await pool.query(
-    `INSERT INTO chat_threads (thread_id, created_at, completed, source)
-     VALUES ($1, NOW(), false, $2)
-     ON CONFLICT (thread_id) DO NOTHING`,
-    [threadId, source]
+    `INSERT INTO chat_threads (thread_id, created_at, completed, source, assistant_id)
+     VALUES ($1, NOW(), false, $2, $3)
+     ON CONFLICT (thread_id) 
+     DO UPDATE SET assistant_id = EXCLUDED.assistant_id`,
+    [threadId, source, assistantId]
   );
 }
 
@@ -215,7 +218,7 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
     if (cleanBotType) {
       threadBotTypes.set(threadId, cleanBotType);
     }
-    await logThreadStart(threadId);
+    await logThreadStart(threadId, 'website', cleanBotType);
   }
 
   await waitForRunCompletion(threadId); // ✅ Ensure no active runs
