@@ -190,35 +190,19 @@
       position: "absolute",
       top: "20px",
       right: "20px",
-      fontSize: "24px",
-      color: "#fff",
-      backgroundColor: "rgba(0,0,0,0.6)",
-      padding: "6px 12px",
-      borderRadius: "8px",
+      fontSize: "18px",
+      color: "#ffffff",
+      backgroundColor: "#444444",
+      padding: "4.5px 9px",
+      borderRadius: "6px",
       cursor: "pointer",
       zIndex: "10000",
       transition: "background-color 0.2s ease"
     });
 
-    // Mobile-friendly close button
-    const mobileCloseButton = document.createElement("div");
-    mobileCloseButton.innerText = "Close Chat";
-    Object.assign(mobileCloseButton.style, {
-      position: "absolute",
-      bottom: "20px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      backgroundColor: "#0078d4",
-      color: "#fff",
-      padding: "12px 24px",
-      borderRadius: "24px",
-      fontSize: "16px",
-      cursor: "pointer",
-      zIndex: "10000",
-      display: "none", // Hidden by default, shown on mobile
-      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-      transition: "background-color 0.2s ease"
-    });
+    // Add hover effects
+    closeButton.onmouseover = () => closeButton.style.backgroundColor = "#333333";
+    closeButton.onmouseout = () => closeButton.style.backgroundColor = "#444444";
 
     // Error message
     const errorMessage = document.createElement("div");
@@ -262,11 +246,6 @@
       document.body.style.overflow = "hidden";
       button.style.display = "none"; // Hide the button when chat is open
       
-      // Show mobile close button on small screens
-      if (window.innerWidth <= 768) {
-        mobileCloseButton.style.display = "block";
-      }
-
       // Focus management for mobile
       setTimeout(() => {
         try {
@@ -291,7 +270,6 @@
       setTimeout(() => {
         overlay.style.display = "none";
         document.body.style.overflow = "";
-        mobileCloseButton.style.display = "none";
         button.style.display = "block"; // Show the button again when chat is closed
         
         // Don't reset iframe opacity, just ensure it's ready for next open
@@ -306,23 +284,7 @@
     };
 
     closeButton.onclick = closeChat;
-    mobileCloseButton.onclick = closeChat;
 
-    // Add hover effects
-    closeButton.onmouseover = () => closeButton.style.backgroundColor = "rgba(0,0,0,0.8)";
-    closeButton.onmouseout = () => closeButton.style.backgroundColor = "rgba(0,0,0,0.6)";
-    mobileCloseButton.onmouseover = () => mobileCloseButton.style.backgroundColor = "#006cbd";
-    mobileCloseButton.onmouseout = () => mobileCloseButton.style.backgroundColor = "#0078d4";
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768) {
-        mobileCloseButton.style.display = overlay.style.display === "block" ? "block" : "none";
-      } else {
-        mobileCloseButton.style.display = "none";
-      }
-    });
-  
     // Update spinner positioning
     Object.assign(spinner.style, {
       position: "absolute",
@@ -332,7 +294,6 @@
 
     overlay.appendChild(iframeContainer);
     overlay.appendChild(closeButton);
-    overlay.appendChild(mobileCloseButton);
     overlay.appendChild(spinner);
     document.body.appendChild(overlay);
 
