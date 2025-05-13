@@ -63,13 +63,16 @@
       cursor: "pointer",
       zIndex: "9999",
       boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-      transition: "transform 0.2s ease",
-      userSelect: "none"
+      transition: "transform 0.2s ease, width 0.3s ease, right 0.3s ease, border-radius 0.3s ease",
+      userSelect: "none",
+      animation: "initialExpand 3.75s ease-in-out"
     });
 
-    // Add hover effect
-    button.onmouseover = () => button.style.transform = "scale(1.05)";
-    button.onmouseout = () => button.style.transform = "scale(1)";
+    // Add hover effect (but only after initial animation)
+    setTimeout(() => {
+      button.onmouseover = () => button.style.transform = "scale(1.05)";
+      button.onmouseout = () => button.style.transform = "scale(1)";
+    }, 3750); // Match animation duration
   
     document.body.appendChild(button);
   
@@ -81,11 +84,26 @@
       left: "0",
       width: "100vw",
       height: "100vh",
-      backgroundColor: "rgba(0,0,0,0.6)",
+      backgroundColor: "rgba(0,0,0,0.75)", // 75% black opacity
       display: "none",
       zIndex: "9998",
       opacity: "0",
-      transition: "opacity 0.3s ease"
+      transition: "opacity 0.3s ease",
+      padding: "10px" // Add 10px margin all around
+    });
+  
+    // Create a container for the iframe to control max-width
+    const iframeContainer = document.createElement("div");
+    Object.assign(iframeContainer.style, {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      maxWidth: "1000px",
+      margin: "0 auto",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxSizing: "border-box" // Ensure padding doesn't affect final size
     });
   
     // Loading spinner
@@ -111,6 +129,27 @@
         0% { transform: translate(-50%, -50%) rotate(0deg); }
         100% { transform: translate(-50%, -50%) rotate(360deg); }
       }
+
+      @keyframes initialExpand {
+        0% { 
+          width: 90%;
+          right: 5%;
+          border-radius: 24px;
+          transform: scale(1);
+        }
+        85% { 
+          width: 90%;
+          right: 5%;
+          border-radius: 24px;
+          transform: scale(1);
+        }
+        100% { 
+          width: auto;
+          right: 20px;
+          border-radius: 24px;
+          transform: scale(1);
+        }
+      }
     `;
     document.head.appendChild(style);
   
@@ -123,9 +162,15 @@
       border: "none",
       display: "block",
       opacity: "0",
-      transition: "opacity 0.3s ease"
+      transition: "opacity 0.3s ease",
+      backgroundColor: "#fff",
+      borderRadius: "8px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
     });
 
+    // Add iframe to container
+    iframeContainer.appendChild(iframe);
+    
     // Handle iframe load
     iframe.onload = () => {
       spinner.style.display = "none";
@@ -137,7 +182,7 @@
       spinner.style.display = "none";
       showError();
     };
-  
+    
     // Close button (desktop)
     const closeButton = document.createElement("div");
     closeButton.innerText = "✖";
@@ -254,7 +299,14 @@
       }
     });
   
-    overlay.appendChild(iframe);
+    // Update spinner positioning
+    Object.assign(spinner.style, {
+      position: "absolute",
+      left: "50%",
+      top: "50%"
+    });
+
+    overlay.appendChild(iframeContainer);
     overlay.appendChild(closeButton);
     overlay.appendChild(mobileCloseButton);
     overlay.appendChild(spinner);

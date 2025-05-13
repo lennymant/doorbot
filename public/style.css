@@ -141,19 +141,19 @@ html, body {
 }
 
 .bot-option {
-  margin-right: 0.4rem;  /* Further reduced margin */
-  margin-top: 0.2rem;  /* Further reduced margin */
-  padding: 0.3rem 0.5rem;  /* Further reduced padding */
-  border-radius: 0.3rem;  /* Slightly reduced border radius */
-  border: 1px solid var(--color-button-bg);
+  margin-right: 0.4rem;
+  margin-top: 0.2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.3rem;
+  border: 1px solid #666;
   cursor: pointer;
-  background: var(--color-button-bg);
-  font-size: 0.85rem;  /* Further reduced font size */
+  background: #666;
+  font-size: 0.85rem;
   color: var(--color-button-text);
   font-family: 'Open Sans', sans-serif;
-  min-width: 120px; /* Add minimum width */
-  text-align: center; /* Center the text */
-  padding: 0.5rem 1rem; /* Increase padding for better button size */
+  min-width: 120px;
+  text-align: center;
+  transition: all 0.2s ease;
 }
 
 .bot-option:hover {

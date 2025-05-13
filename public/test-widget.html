@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f5f5f5;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .content {
+            margin-bottom: 40px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Widget Test Page</h1>
+        <p>This page demonstrates the Door4 chatbot widget in a typical webpage layout.</p>
+    </div>
+
+    <div class="content">
+        <div class="section">
+            <h2>About Us</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+        </div>
+
+        <div class="section">
+            <h2>Our Services</h2>
+            <ul>
+                <li>Digital Strategy</li>
+                <li>Web Development</li>
+                <li>SEO & Marketing</li>
+                <li>User Experience Design</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Contact</h2>
+            <p>Get in touch with us to discuss your next project. Our team is ready to help you achieve your digital goals.</p>
+        </div>
+    </div>
+
+    <!-- Widget Script -->
+    <script>
+        // Add error handling to help debug widget loading
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
+            return false;
+        };
+    </script>
+    <script src="widget.js" defer></script>
+    
+    <!-- Debug info -->
+    <script>
+        console.log('Test page loaded. Checking for widget script...');
+        window.addEventListener('load', function() {
+            console.log('Window loaded. Widget should be visible.');
+        });
+    </script>
+</body>
+</html> 
