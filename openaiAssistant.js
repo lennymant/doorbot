@@ -55,32 +55,15 @@ async function logThreadStart(threadId, source = 'website', botType = 'default')
   console.log(`Selected assistant ID: ${assistantId} for bot type: ${botType}`);
   
   try {
-    // First check if we already have a thread record
-    const existingThread = await pool.query(
-      'SELECT thread_id, assistant_id FROM chat_threads WHERE thread_id = $1',
-      [threadId]
+    const result = await pool.query(
+      `INSERT INTO chat_threads (thread_id, created_at, completed, source, assistant_id)
+       VALUES ($1, NOW(), false, $2, $3)
+       ON CONFLICT (thread_id) 
+       DO UPDATE SET assistant_id = EXCLUDED.assistant_id
+       RETURNING *`,
+      [threadId, source, assistantId]
     );
-
-    if (existingThread.rows.length > 0) {
-      // Update existing thread with new assistant_id
-      const result = await pool.query(
-        `UPDATE chat_threads 
-         SET assistant_id = $1
-         WHERE thread_id = $2
-         RETURNING *`,
-        [assistantId, threadId]
-      );
-      console.log(`✅ Thread record updated with assistant ID:`, result.rows[0]);
-    } else {
-      // Insert new thread
-      const result = await pool.query(
-        `INSERT INTO chat_threads (thread_id, created_at, completed, source, assistant_id)
-         VALUES ($1, NOW(), false, $2, $3)
-         RETURNING *`,
-        [threadId, source, assistantId]
-      );
-      console.log(`✅ Thread record created:`, result.rows[0]);
-    }
+    console.log(`✅ Thread record created/updated:`, result.rows[0]);
   } catch (error) {
     console.error(`❌ Error in logThreadStart:`, error);
     throw error;

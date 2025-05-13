@@ -84,13 +84,9 @@
       }
     }
 
-    // Get bot type from URL query string and store in localStorage if not already set
+    // Get bot type from URL query string
     const urlParams = new URLSearchParams(window.location.search);
-    const urlBotType = urlParams.get('bot');
-    if (urlBotType && !localStorage.getItem('botType')) {
-      localStorage.setItem('botType', urlBotType);
-    }
-    const botType = localStorage.getItem('botType') || 'default';
+    const botType = urlParams.get('bot');
 
     const chat = document.getElementById("chatBox");
     let chatStartTime = null;
@@ -117,8 +113,6 @@
     async function sendMessage(message) {
       const threadId = localStorage.getItem("threadId");
       console.log("Current thread ID:", threadId);
-      const currentBotType = localStorage.getItem('botType') || 'default';
-      console.log("Using bot type:", currentBotType);
 
       try {
         showTyping();
@@ -143,7 +137,7 @@
           message: messageToSend,
           threadId,
           chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0,
-          botType: currentBotType // Use bot type from localStorage
+          botType: botType // Always send bot type from URL
         };
 
         const res = await fetch("/chat", {
@@ -220,8 +214,7 @@
       
       document.getElementById("loadingOverlay").classList.remove("hidden");
       // Add bot type to BEGIN-CHAT message
-      const currentBotType = localStorage.getItem('botType') || 'default';
-      const botParam = currentBotType ? ` [[BOT:${currentBotType}]]` : '';
+      const botParam = botType ? ` [[BOT:${botType}]]` : '';
       sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
     };
     document.getElementById("confirmNo").onclick = function() {
@@ -293,9 +286,7 @@
         chatStartTime = Date.now();
         
         // Send initial message with time info and bot type
-        const currentBotType = localStorage.getItem('botType') || 'default';
-        console.log("Starting new chat with bot type:", currentBotType);
-        const botParam = currentBotType ? ` [[BOT:${currentBotType}]]` : '';
+        const botParam = botType ? ` [[BOT:${botType}]]` : '';
         sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
       }
     });
