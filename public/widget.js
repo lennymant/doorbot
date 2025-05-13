@@ -266,6 +266,24 @@
       if (window.innerWidth <= 768) {
         mobileCloseButton.style.display = "block";
       }
+
+      // Focus management for mobile
+      setTimeout(() => {
+        try {
+          // Try to focus the iframe first
+          iframe.focus();
+          // Then try to find and focus the input inside the iframe
+          const iframeDoc = iframe.contentWindow.document;
+          const input = iframeDoc.getElementById("userInput");
+          if (input) {
+            input.focus();
+            // Scroll to input if needed
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } catch (e) {
+          console.warn('Focus management error:', e);
+        }
+      }, 400); // Slightly longer timeout to ensure iframe is fully loaded
     };
   
     const closeChat = () => {
@@ -275,9 +293,15 @@
         document.body.style.overflow = "";
         mobileCloseButton.style.display = "none";
         button.style.display = "block"; // Show the button again when chat is closed
-        // Reset iframe
-        iframe.style.opacity = "0";
-        spinner.style.display = "block";
+        
+        // Don't reset iframe opacity, just ensure it's ready for next open
+        iframe.style.display = "block";
+        spinner.style.display = "none";
+        
+        // Ensure iframe is still loaded and visible
+        if (iframe.style.opacity === "0") {
+          iframe.style.opacity = "1";
+        }
       }, 300);
     };
 
