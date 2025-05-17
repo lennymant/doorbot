@@ -481,6 +481,10 @@ button:hover {
   border-top: 1px solid #e9ecef;
   padding: 1rem;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .chat-ended-message {
@@ -508,41 +512,24 @@ button:hover {
   font-weight: 500;
 }
 
-/* ===================================================
-   Reset Button
-=================================================== */
-.reset-button-container {
-  text-align: center;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+/* Dark theme for chat ended state */
+.dark-theme .chat-ended {
+  background: #2d2d2d;
+  border-top-color: #3d3d3d;
 }
 
-.reset-button {
-  background: #eee;
-  color: #333;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  border: 1px solid #aaa;
-  cursor: pointer;
-  font-size: 0.9rem;
+.dark-theme .chat-ended-message {
+  color: #e0e0e0;
 }
 
-.reset-button:hover {
-  background: #ddd;
+/* Tools Button and Menu */
+.tools-container {
+  position: relative;
+  display: inline-block;
 }
 
-.timestamp {
-  color: var(--color-text-light);
-  font-size: 0.8rem;
-  font-family: monospace;
-}
-
-/* Tools Button */
 .tools-button {
-  background: #f0f0f0;
+  background: var(--color-bot-bg);
   border: none;
   border-radius: 4px;
   padding: 8px;
@@ -554,57 +541,71 @@ button:hover {
 }
 
 .tools-button:hover {
-  background: #e0e0e0;
+  background: #d1d5db;
 }
 
 .tools-button svg {
   color: #666;
 }
 
-/* Tools Modal */
-.tools-modal {
-  max-width: 300px;
-  padding: 20px;
+.tools-menu {
+  position: absolute;
+  right: 0;
+  bottom: 100%;  /* Changed from top: 100% to bottom: 100% */
+  margin-bottom: 4px;  /* Changed from margin-top to margin-bottom */
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  z-index: 1000;
 }
 
-.tools-modal h3 {
-  margin: 0 0 15px 0;
-  color: #333;
-}
-
-.tools-list {
+.tools-menu-item {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tools-list button {
-  padding: 8px 12px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.tools-list button:hover {
-  background: #e0e0e0;
-}
-
-.close-button {
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  padding: 8px;
-  background: #0078d4;
-  color: white;
+  padding: 8px 12px;
   border: none;
-  border-radius: 4px;
+  background: none;
+  color: #333;
+  text-align: left;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.close-button:hover {
-  background: #006cbd;
+.tools-menu-item:hover {
+  background: #f3f4f6;
+}
+
+.tools-menu-item span {
+  font-size: 14px;
+}
+
+/* Dark Theme for Tools */
+.dark-theme .tools-button {
+  background: #3d3d3d;
+}
+
+.dark-theme .tools-button:hover {
+  background: #4d4d4d;
+}
+
+.dark-theme .tools-button svg {
+  color: #ffffff;
+}
+
+.dark-theme .tools-menu {
+  background: #2d2d2d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .tools-menu-item {
+  color: #ffffff;
+}
+
+.dark-theme .tools-menu-item:hover {
+  background: #3d3d3d;
 }
 
 /* Dark Theme */
@@ -629,27 +630,6 @@ button:hover {
   background-color: #2d2d2d;
   color: #ffffff;
   border-color: #3d3d3d;
-}
-
-.dark-theme .tools-button {
-  background: #3d3d3d;
-}
-
-.dark-theme .tools-button:hover {
-  background: #4d4d4d;
-}
-
-.dark-theme .tools-button svg {
-  color: #ffffff;
-}
-
-.dark-theme .tools-list button {
-  background: #3d3d3d;
-  color: #ffffff;
-}
-
-.dark-theme .tools-list button:hover {
-  background: #4d4d4d;
 }
 
 .dark-theme .modal-content {

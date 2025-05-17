@@ -48,19 +48,23 @@
   <div id="inputArea">
     <input id="userInput" type="text" placeholder="Type your message here..." />
     <button onclick="handleSend()">Send</button>
-    <button id="toolsButton" class="tools-button" onclick="toggleTools()">
-      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- 🔄 Reset Chat Button -->
-  <div class="reset-button-container">
-    <button onclick="resetChat()" class="reset-button">
-      Reset Chat
-    </button>
-    <div class="timestamp"></div>
+    <div class="tools-container">
+      <button id="toolsButton" class="tools-button" onclick="toggleTools()">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </svg>
+      </button>
+      <div id="toolsMenu" class="tools-menu hidden">
+        <button onclick="toggleSound()" class="tools-menu-item">
+          <span class="sound-icon">🔊</span>
+          <span class="sound-text">Mute Sounds</span>
+        </button>
+        <button onclick="resetChat()" class="tools-menu-item">
+          <span class="reset-icon">🔄</span>
+          <span>Reset Chat</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ⚠️ Reset Confirmation Modal -->
@@ -89,6 +93,7 @@
   <!-- ========================= -->
   <script>
     const TESTING_MODE = false;
+    let isSoundMuted = false;
 
     if (TESTING_MODE) {
       const testBanner = document.getElementById("testBanner");
@@ -104,6 +109,14 @@
     // Get bot type from URL query string
     const urlParams = new URLSearchParams(window.location.search);
     const botType = urlParams.get('bot');
+    
+    // Get all additional parameters (excluding 'bot')
+    const additionalParams = {};
+    for (const [key, value] of urlParams.entries()) {
+      if (key !== 'bot') {
+        additionalParams[key] = value;
+      }
+    }
 
     const chat = document.getElementById("chatBox");
     let chatStartTime = null;
@@ -146,15 +159,22 @@
             minute: "2-digit",
             hour12: false
           });
-          messageToSend = `${message} [[TIME:${ukTime}]]`;
+          
+          // Add all additional parameters to BEGIN-CHAT message
+          const paramStrings = Object.entries(additionalParams)
+            .map(([key, value]) => ` [[${key.toUpperCase()}:${value}]]`)
+            .join('');
+            
+          messageToSend = `${message} [[TIME:${ukTime}]]${paramStrings}`;
         }
 
-        // Add bot type to request
+        // Add bot type and additional params to request
         const requestBody = {
           message: messageToSend,
           threadId,
           chatDuration: chatStartTime ? Math.floor((Date.now() - chatStartTime) / 1000) : 0,
-          botType: botType // Always send bot type from URL
+          botType: botType, // Always send bot type from URL
+          additionalParams: additionalParams // Send all additional parameters
         };
 
         const res = await fetch("/chat", {
@@ -249,24 +269,6 @@
           if (e.key === "Enter") handleSend(e);
         });
       }
-
-      // Update timestamp
-      function updateTimestamp() {
-        const ukTime = new Date().toLocaleString("en-GB", {
-          timeZone: "Europe/London",
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        });
-        document.querySelector('.timestamp').textContent = ukTime;
-      }
-      
-      // Update timestamp immediately and every minute
-      updateTimestamp();
-      setInterval(updateTimestamp, 60000);
       
       // Load Previous Chat if Exists
       const savedThreadId = localStorage.getItem("threadId");
@@ -279,6 +281,8 @@
       if (savedThreadId && savedMessages.length > 0) {
         console.log("Loading existing chat...");
         savedMessages.forEach(({ role, text }) => addMessage(role, text));
+        // Hide loading overlay if we have existing chat
+        document.getElementById("loadingOverlay").classList.add("hidden");
       } else {
         console.log("Starting new chat...");
         // Clear any stale data and start fresh
@@ -355,7 +359,7 @@
       div.innerHTML = tempDiv.innerHTML;
       container.appendChild(div);
 
-      if (role === "bot" && !isHidden) {
+      if (role === "bot" && !isHidden && !isSoundMuted) {
         const blip = document.getElementById("blipSound");
         blip.currentTime = 0;
         blip.play();
@@ -398,6 +402,23 @@
           <div class="chat-ended-message">
             <div class="chat-ended-icon">✓</div>
             <div class="chat-ended-text">The Chat has ended</div>
+          </div>
+          <div class="tools-container">
+            <button id="toolsButton" class="tools-button" onclick="toggleTools()">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+              </svg>
+            </button>
+            <div id="toolsMenu" class="tools-menu hidden">
+              <button onclick="toggleSound()" class="tools-menu-item">
+                <span class="sound-icon">🔊</span>
+                <span class="sound-text">Mute Sounds</span>
+              </button>
+              <button onclick="resetChat()" class="tools-menu-item">
+                <span class="reset-icon">🔄</span>
+                <span>Reset Chat</span>
+              </button>
+            </div>
           </div>
         `;
         inputArea.classList.add("chat-ended");
@@ -443,6 +464,50 @@
     if (localStorage.getItem("darkTheme") === "true") {
       document.body.classList.add("dark-theme");
     }
+
+    // Toggle sound mute state
+    function toggleSound() {
+      isSoundMuted = !isSoundMuted;
+      const soundIcon = document.querySelector('.sound-icon');
+      const soundText = document.querySelector('.sound-text');
+      
+      if (isSoundMuted) {
+        soundIcon.textContent = '🔇';
+        soundText.textContent = 'Unmute Sounds';
+      } else {
+        soundIcon.textContent = '🔊';
+        soundText.textContent = 'Mute Sounds';
+      }
+      
+      // Save preference to localStorage
+      localStorage.setItem('soundMuted', isSoundMuted);
+    }
+
+    // Check for saved sound preference
+    if (localStorage.getItem('soundMuted') === 'true') {
+      isSoundMuted = true;
+      const soundIcon = document.querySelector('.sound-icon');
+      const soundText = document.querySelector('.sound-text');
+      soundIcon.textContent = '🔇';
+      soundText.textContent = 'Unmute Sounds';
+    }
+
+    // Toggle tools menu
+    function toggleTools() {
+      const menu = document.getElementById("toolsMenu");
+      menu.classList.toggle("hidden");
+    }
+
+    // Close tools menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const toolsContainer = document.querySelector('.tools-container');
+      const toolsButton = document.getElementById('toolsButton');
+      const toolsMenu = document.getElementById('toolsMenu');
+      
+      if (!toolsContainer.contains(event.target) && !toolsMenu.classList.contains('hidden')) {
+        toolsMenu.classList.add('hidden');
+      }
+    });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
