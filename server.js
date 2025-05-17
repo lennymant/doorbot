@@ -18,7 +18,7 @@ app.get('/api/v1/bot-config', (req, res) => {
     // and ensure corresponding BOT_NAME_... variables exist in .env
     const botNamesMap = {
       default: process.env.BOT_NAME_DEFAULT || 'Mac', // Fallback if env var missing
-      candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant', // Fallback
+      candidate: process.env.BOT_NAME_CANDIDATE || 'Mike S', // Fallback
       // mikes: process.env.BOT_NAME_MIKES || 'Mike S', // Keep this commented if Mike S is not one of the two
     };
     console.log('Sending bot config:', botNamesMap); // Log for debugging
@@ -32,7 +32,7 @@ app.get('/api/v1/bot-config', (req, res) => {
 // Add endpoint to serve chatbot URL
 app.get('/api/v1/chatbot-url', (req, res) => {
   try {
-    const chatbotUrl = process.env.CHATBOT_URL || 'https://doorbot.onrender.com';
+    const chatbotUrl = process.env.CHATBOT_URL || 'https://sandbox.preview3.co.uk';
     res.json({ url: chatbotUrl });
   } catch (error) {
     console.error('Error fetching chatbot URL:', error);
