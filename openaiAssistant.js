@@ -9,13 +9,15 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // Map bot types to assistant IDs
 const BOT_ASSISTANTS = {
   default: process.env.ASSISTANT_ID_DEFAULT,
-  candidate: process.env.ASSISTANT_ID_CANDIDATE
+  candidate: process.env.ASSISTANT_ID_CANDIDATE,
+  reverb: process.env.ASSISTANT_ID_REVERB
 };
 
 // Map bot types to bot names
 const BOT_NAMES = {
   default: process.env.BOT_NAME_DEFAULT || 'Mac',
-  candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant'
+  candidate: process.env.BOT_NAME_CANDIDATE || 'Assistant',
+  reverb: process.env.BOT_NAME_REVERB || 'Reverb'
 };
 
 // Store thread to bot type mapping
