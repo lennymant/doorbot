@@ -278,13 +278,14 @@
         localStorage.removeItem("chatHistory");
         showLoadingOverlay();
         
-        // Wait for window focus before starting chat
-        if (document.hasFocus()) {
-          startNewChat();
-        } else {
-          // Add focus event listener to start chat when window gains focus
+        // Start chat immediately but add a flag to track if it was started without focus
+        let startedWithoutFocus = !document.hasFocus();
+        startNewChat();
+        
+        // If started without focus, add a focus listener to show a message
+        if (startedWithoutFocus) {
           window.addEventListener('focus', function onFocus() {
-            startNewChat();
+            console.log("Window gained focus after chat start");
             window.removeEventListener('focus', onFocus);
           });
         }
