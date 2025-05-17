@@ -101,6 +101,8 @@
   <!-- ========================= -->
   <!-- 🚀 Main Script -->
   <!-- ========================= -->
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     const TESTING_MODE = false;
     let isSoundMuted = false;
@@ -297,7 +299,7 @@
         hour12: false
       });
       
-      document.getElementById("loadingOverlay").classList.remove("hidden");
+      showLoadingOverlay();
       // Add bot type to BEGIN-CHAT message
       const botParam = botType ? ` [[BOT:${botType}]]` : '';
       sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
@@ -330,13 +332,13 @@
         console.log("Loading existing chat...");
         savedMessages.forEach(({ role, text }) => addMessage(role, text));
         // Hide loading overlay if we have existing chat
-        document.getElementById("loadingOverlay").classList.add("hidden");
+        hideLoadingOverlay();
       } else {
         console.log("Starting new chat...");
         // Clear any stale data and start fresh
         localStorage.removeItem("threadId");
         localStorage.removeItem("chatHistory");
-        document.getElementById("loadingOverlay").classList.remove("hidden");
+        showLoadingOverlay();
         
         // Get current UK time
         const ukTime = new Date().toLocaleString("en-GB", {
@@ -571,9 +573,33 @@
         toolsMenu.classList.add('hidden');
       }
     });
-  </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    // Loading overlay cycling phrases
+    let loadingPhraseIndex = 0;
+    let loadingPhraseInterval = null;
+
+    function showLoadingOverlay() {
+      const overlay = document.getElementById("loadingOverlay");
+      const loadingText = overlay.querySelector(".loading-text");
+      loadingPhraseIndex = 0;
+      loadingText.textContent = window.config.loadingPhrases[loadingPhraseIndex];
+      overlay.classList.remove("hidden");
+      if (loadingPhraseInterval) clearInterval(loadingPhraseInterval);
+      loadingPhraseInterval = setInterval(() => {
+        loadingPhraseIndex = (loadingPhraseIndex + 1) % window.config.loadingPhrases.length;
+        loadingText.textContent = window.config.loadingPhrases[loadingPhraseIndex];
+      }, 2000);
+    }
+
+    function hideLoadingOverlay() {
+      const overlay = document.getElementById("loadingOverlay");
+      overlay.classList.add("hidden");
+      if (loadingPhraseInterval) {
+        clearInterval(loadingPhraseInterval);
+        loadingPhraseInterval = null;
+      }
+    }
+  </script>
 </body>
 
 </html>
