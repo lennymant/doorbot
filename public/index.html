@@ -322,7 +322,20 @@
 
       const div = document.createElement("div");
       div.className = `message ${role}`;
-      div.innerHTML = marked.parse(cleanedText);
+      
+      // Process the text with marked and then ensure all links have target="_blank"
+      const processedHtml = marked.parse(cleanedText);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = processedHtml;
+      
+      // Add target="_blank" to all links
+      const links = tempDiv.getElementsByTagName('a');
+      for (let link of links) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+      
+      div.innerHTML = tempDiv.innerHTML;
       container.appendChild(div);
 
       if (role === "bot" && !isHidden) {
