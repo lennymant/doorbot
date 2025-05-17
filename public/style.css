@@ -539,3 +539,124 @@ button:hover {
   font-size: 0.8rem;
   font-family: monospace;
 }
+
+/* Tools Button */
+.tools-button {
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.tools-button:hover {
+  background: #e0e0e0;
+}
+
+.tools-button svg {
+  color: #666;
+}
+
+/* Tools Modal */
+.tools-modal {
+  max-width: 300px;
+  padding: 20px;
+}
+
+.tools-modal h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.tools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tools-list button {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tools-list button:hover {
+  background: #e0e0e0;
+}
+
+.close-button {
+  width: 100%;
+  padding: 8px;
+  background: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+  background: #006cbd;
+}
+
+/* Dark Theme */
+.dark-theme {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.dark-theme #chatBox {
+  background-color: #2d2d2d;
+}
+
+.dark-theme .message {
+  background-color: #3d3d3d;
+}
+
+.dark-theme .message.user {
+  background-color: #0078d4;
+}
+
+.dark-theme #userInput {
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border-color: #3d3d3d;
+}
+
+.dark-theme .tools-button {
+  background: #3d3d3d;
+}
+
+.dark-theme .tools-button:hover {
+  background: #4d4d4d;
+}
+
+.dark-theme .tools-button svg {
+  color: #ffffff;
+}
+
+.dark-theme .tools-list button {
+  background: #3d3d3d;
+  color: #ffffff;
+}
+
+.dark-theme .tools-list button:hover {
+  background: #4d4d4d;
+}
+
+.dark-theme .modal-content {
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+.dark-theme .modal-content h3 {
+  color: #ffffff;
+}
