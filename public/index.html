@@ -223,71 +223,8 @@
       document.getElementById("userInput")?.focus();
     }
 
-    // Setup Modal Listeners ONCE
-    const modal = document.getElementById("confirmModal");
-    document.getElementById("confirmYes").onclick = function() {
-      modal.classList.add("hidden");
-      localStorage.removeItem("threadId");
-      localStorage.removeItem("chatHistory");
-      chat.innerHTML = '';
-      
-      // Restore input area to original state (with tools button and menu)
-      const inputArea = document.getElementById("inputArea");
-      inputArea.innerHTML = `
-        <input id="userInput" type="text" placeholder="Type your message here..." />
-        <button onclick="handleSend()">Send</button>
-        <div class="tools-container">
-          <button id="toolsButton" class="tools-button" onclick="toggleTools()">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-            </svg>
-          </button>
-          <div id="toolsMenu" class="tools-menu hidden">
-            <button onclick="toggleSound()" class="tools-menu-item">
-              <svg class="menu-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                <path class="sound-on" d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                <path class="sound-on" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                <path class="sound-on" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                <path class="sound-off" d="M11 5L6 9H2v6h4l5 4V5z" style="display: none;"></path>
-                <path class="sound-off" d="M23 9l-6 6" style="display: none;"></path>
-                <path class="sound-off" d="M17 9l6 6" style="display: none;"></path>
-              </svg>
-              <span class="sound-text">Mute Sounds</span>
-            </button>
-            <button onclick="resetChat()" class="tools-menu-item">
-              <svg class="menu-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-              </svg>
-              <span>Reset Chat</span>
-            </button>
-          </div>
-        </div>
-      `;
-      inputArea.classList.remove("chat-ended");
-      
-      // Reattach event listeners
-      const newInput = document.getElementById("userInput");
-      if (newInput) {
-        newInput.addEventListener("keydown", function(e) {
-          if (e.key === "Enter") handleSend(e);
-        });
-      }
-      
-      // Reapply sound icon state if muted
-      if (localStorage.getItem('soundMuted') === 'true') {
-        isSoundMuted = true;
-        const soundOnPaths = document.querySelectorAll('.sound-on');
-        const soundOffPaths = document.querySelectorAll('.sound-off');
-        const soundText = document.querySelector('.sound-text');
-        soundOnPaths.forEach(path => path.style.display = 'none');
-        soundOffPaths.forEach(path => path.style.display = 'block');
-        soundText.textContent = 'Unmute Sounds';
-      }
-      
-      // Reset chat timer
-      chatStartTime = Date.now();
-      
+    // Function to start a new chat
+    function startNewChat() {
       // Get current UK time
       const ukTime = new Date().toLocaleString("en-GB", {
         timeZone: "Europe/London",
@@ -299,14 +236,15 @@
         hour12: false
       });
       
-      showLoadingOverlay();
-      // Add bot type to BEGIN-CHAT message
+      console.log("Sending time to chatbot:", ukTime);
+      
+      // Start the chat timer
+      chatStartTime = Date.now();
+      
+      // Send initial message with time info and bot type
       const botParam = botType ? ` [[BOT:${botType}]]` : '';
       sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
-    };
-    document.getElementById("confirmNo").onclick = function() {
-      modal.classList.add("hidden");
-    };
+    }
 
     // Initialize chat when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', function() {
@@ -340,25 +278,16 @@
         localStorage.removeItem("chatHistory");
         showLoadingOverlay();
         
-        // Get current UK time
-        const ukTime = new Date().toLocaleString("en-GB", {
-          timeZone: "Europe/London",
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        });
-        
-        console.log("Sending time to chatbot:", ukTime);
-        
-        // Start the chat timer
-        chatStartTime = Date.now();
-        
-        // Send initial message with time info and bot type
-        const botParam = botType ? ` [[BOT:${botType}]]` : '';
-        sendMessage(`[[BEGIN-CHAT]]${botParam} [[TIME:${ukTime}]]`);
+        // Wait for window focus before starting chat
+        if (document.hasFocus()) {
+          startNewChat();
+        } else {
+          // Add focus event listener to start chat when window gains focus
+          window.addEventListener('focus', function onFocus() {
+            startNewChat();
+            window.removeEventListener('focus', onFocus);
+          });
+        }
       }
     });
 
@@ -599,6 +528,88 @@
         loadingPhraseInterval = null;
       }
     }
+
+    // Setup Modal Listeners ONCE
+    const modal = document.getElementById("confirmModal");
+    document.getElementById("confirmYes").onclick = function() {
+      modal.classList.add("hidden");
+      localStorage.removeItem("threadId");
+      localStorage.removeItem("chatHistory");
+      chat.innerHTML = '';
+      
+      // Restore input area to original state (with tools button and menu)
+      const inputArea = document.getElementById("inputArea");
+      inputArea.innerHTML = `
+        <input id="userInput" type="text" placeholder="Type your message here..." />
+        <button onclick="handleSend()">Send</button>
+        <div class="tools-container">
+          <button id="toolsButton" class="tools-button" onclick="toggleTools()">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </button>
+          <div id="toolsMenu" class="tools-menu hidden">
+            <button onclick="toggleSound()" class="tools-menu-item">
+              <svg class="menu-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <path class="sound-on" d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                <path class="sound-on" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path class="sound-on" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                <path class="sound-off" d="M11 5L6 9H2v6h4l5 4V5z" style="display: none;"></path>
+                <path class="sound-off" d="M23 9l-6 6" style="display: none;"></path>
+                <path class="sound-off" d="M17 9l6 6" style="display: none;"></path>
+              </svg>
+              <span class="sound-text">Mute Sounds</span>
+            </button>
+            <button onclick="resetChat()" class="tools-menu-item">
+              <svg class="menu-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              <span>Reset Chat</span>
+            </button>
+          </div>
+        </div>
+      `;
+      inputArea.classList.remove("chat-ended");
+      
+      // Reattach event listeners
+      const newInput = document.getElementById("userInput");
+      if (newInput) {
+        newInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") handleSend(e);
+        });
+      }
+      
+      // Reapply sound icon state if muted
+      if (localStorage.getItem('soundMuted') === 'true') {
+        isSoundMuted = true;
+        const soundOnPaths = document.querySelectorAll('.sound-on');
+        const soundOffPaths = document.querySelectorAll('.sound-off');
+        const soundText = document.querySelector('.sound-text');
+        soundOnPaths.forEach(path => path.style.display = 'none');
+        soundOffPaths.forEach(path => path.style.display = 'block');
+        soundText.textContent = 'Unmute Sounds';
+      }
+      
+      // Reset chat timer
+      chatStartTime = Date.now();
+      
+      showLoadingOverlay();
+      
+      // Wait for window focus before starting chat
+      if (document.hasFocus()) {
+        startNewChat();
+      } else {
+        // Add focus event listener to start chat when window gains focus
+        window.addEventListener('focus', function onFocus() {
+          startNewChat();
+          window.removeEventListener('focus', onFocus);
+        });
+      }
+    };
+    document.getElementById("confirmNo").onclick = function() {
+      modal.classList.add("hidden");
+    };
   </script>
 </body>
 
