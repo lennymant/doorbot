@@ -640,3 +640,11 @@ button:hover {
 .dark-theme .modal-content h3 {
   color: #ffffff;
 }
+
+.menu-icon {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
