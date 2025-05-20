@@ -58,13 +58,24 @@ html, body {
 .message {
   position: relative;
   max-width: 65%;  /* Slightly reduced max width */
-  padding: 0.35rem 0.6rem;  /* Further reduced padding */
+  padding: 0.25rem 0.6rem;  /* Reduced vertical padding from 0.35rem to 0.25rem */
   margin: 0.2rem 0;  /* Further reduced margin */
   border-radius: 0.8rem;  /* Slightly reduced border radius */
   line-height: 1.2em;  /* Further reduced line height */
   display: block;
   word-break: break-word;
   font-size: 0.95rem;  /* Slightly reduced font size */
+}
+
+/* Message Timestamp */
+.message-timestamp {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 0.2rem;
+  text-align: right;
+  position: absolute;
+  right: 0;
+  bottom: -1.2rem;  /* Position below the bubble */
 }
 
 /* User Message Bubble */
@@ -75,6 +86,7 @@ html, body {
   border-bottom-right-radius: 0;
   text-align: right;
   margin-left: auto;
+  margin-bottom: 1.4rem;  /* Add space for timestamp */
 }
 
 .user::after {
@@ -94,6 +106,7 @@ html, body {
   background-color: var(--color-bot-bg);
   color: var(--color-bot-text);
   border-bottom-left-radius: 0;
+  margin-bottom: 1.4rem;  /* Add space for timestamp */
 }
 
 .bot::after {

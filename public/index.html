@@ -305,75 +305,49 @@
     // Functions
     // ---------------------------
 
-    function addMessage(role, text) {
-      console.log('addMessage - Original text:', text);
+    function addMessage(role, text, assistantId = null) {
+      console.log('Adding message:', { role, text, assistantId, TESTING_MODE }); // Debug log
       const container = document.createElement("div");
-      const isHidden = /^\\[\\[.*\\]\\]$/.test(text.trim());
-      const matches = [...text.matchAll(/[\{\uff5b][\{\uff5b]\s*(.*?)\s*[\}\uff5d][\}\uff5d]/g)];
-      console.log('addMessage - Matches found:', matches);
+      const isHidden = /^\[\[.*\]\]$/.test(text.trim());
+      const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
 
       const cleanedText = text
-        .replace(/\\[\\[.*?\\]\\]/g, '') 
-        .replace(/^\s*[-*]?\s*[\{\uff5b][\{\uff5b].*?[\}\uff5d][\}\uff5d]\s*$/gm, '')
-        .replace(/[\{\uff5b][\{\uff5b]\s*(.*?)\s*[\}\uff5d][\}\uff5d]/g, '')
+        .replace(/\[\[.*?\]\]/g, '')
+        .replace(/^\s*[-*]?\s*\{\{.*?\}\}\s*$/gm, '')
+        .replace(/\{\{.*?\}\}/g, '')
         .replace(TESTING_MODE ? '' : /【[^【】]*†[^【】]*†[^【】]*】/g, '')
-        .replace(/\\n{3,}/g, '\\n\\n')
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
 
-      console.log('addMessage - Cleaned text for marked:', cleanedText);
-
-      if (isHidden) return;
-      if (!cleanedText && matches.length === 0) return;
+      if (isHidden || !cleanedText) return;
 
       const div = document.createElement("div");
       div.className = `message ${role}`;
-      
-      const processedHtmlByMarked = marked.parse(cleanedText);
-      console.log('addMessage - HTML from marked.parse():', processedHtmlByMarked);
-      
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = processedHtmlByMarked;
+      div.innerHTML = marked.parse(cleanedText);
 
-      // Post-process links
-      const links = tempDiv.getElementsByTagName('a');
-      for (let i = links.length - 1; i >= 0; i--) { // Iterate backwards for safe removal/replacement
-        const link = links[i];
-        let href = link.getAttribute('href');
-        let linkText = link.textContent || link.innerText || '';
-
-        console.log('Post-processing link - Before:', { href, text: linkText, outerHTML: link.outerHTML });
-
-        let modified = false;
-
-        if (href === "[object Object]" || linkText === "[object Object]" || !href || href.trim() === '' || href === 'mailto:') {
-            const replacementText = (linkText && linkText !== "[object Object]") ? linkText : (href && href !== "[object Object]" && href !== "mailto:" ? href : "");
-            console.log('Post-processing link - Malformed or empty, replacing with text:', replacementText);
-            link.parentNode.replaceChild(document.createTextNode(replacementText), link);
-            modified = true;
-        } else {
-            // Ensure mailto links are clean
-            if (href.startsWith('mailto:')) {
-                const emailPart = href.substring(7);
-                if (linkText.startsWith('mailto:') || linkText !== emailPart) {
-                    link.textContent = emailPart;
-                    linkText = emailPart; // update for logs
-                }
-                if (!emailPart) { // if mailto: is empty
-                     link.parentNode.replaceChild(document.createTextNode(linkText), link); // just show text
-                     modified = true;
-                }
-            }
-            if (!modified) {
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer');
-            }
-        }
-        console.log('Post-processing link - After:', modified ? '(replaced with text)' : { href: link.getAttribute('href'), text: link.textContent, outerHTML: link.outerHTML });
+      // Add timestamp for user messages
+      if (role === 'user') {
+        const timestamp = document.createElement("div");
+        timestamp.className = 'message-timestamp';
+        timestamp.textContent = new Date().toLocaleTimeString('en-GB', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false 
+        });
+        div.appendChild(timestamp);
       }
-      
-      div.innerHTML = tempDiv.innerHTML;
-      console.log('addMessage - Final HTML for div:', div.innerHTML);
+
+      // Add assistant ID in testing mode
+      if (TESTING_MODE && role === 'bot' && assistantId) {
+        console.log('Adding assistant ID:', assistantId); // Debug log
+        const idDiv = document.createElement("div");
+        idDiv.className = 'assistant-id';
+        idDiv.textContent = `Assistant ID: ${assistantId}`;
+        div.appendChild(idDiv);
+      }
+
       container.appendChild(div);
+      chat.appendChild(container);
 
       if (role === "bot" && !isHidden && !isSoundMuted) {
         const blip = document.getElementById("blipSound");
@@ -405,7 +379,6 @@
         container.appendChild(buttonRow);
       }
 
-      chat.appendChild(container);
       chat.scrollTop = chat.scrollHeight;
       document.getElementById("userInput")?.focus();
 
