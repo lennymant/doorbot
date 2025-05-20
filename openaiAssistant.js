@@ -256,13 +256,52 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
     const status = await openai.beta.threads.runs.retrieve(threadId, run.id);
     runStatus = status.status;
     attempts++;
-    
+  
     console.log(`⏱️ Assistant run status: ${runStatus} (Attempt ${attempts}/${maxAttempts})`);
-    
-    if (runStatus === 'expired' || runStatus === 'failed') {
+  
+    if (runStatus === 'requires_action' && status.required_action?.submit_tool_outputs?.tool_calls) {
+      const toolCall = status.required_action.submit_tool_outputs.tool_calls[0];
+  
+      console.log(`🔧 Assistant requested tool: ${toolCall.function.name}`, toolCall);
+  
+      try {
+        const toolCallResponse = await fetch('http://localhost:3000/api/v1/tool-call', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tool_call_id: toolCall.id,
+            function_name: toolCall.function.name,
+            arguments: toolCall.function.arguments,
+            run_id: run.id,
+            thread_id: threadId
+          })
+        });
+  
+        if (!toolCallResponse.ok) {
+          const errorText = await toolCallResponse.text();
+          throw new Error(`Tool call failed: ${toolCallResponse.status} - ${errorText}`);
+        }
+  
+        console.log(`✅ Tool call executed and submitted.`);
+      } catch (err) {
+        console.error(`❌ Failed to execute tool:`, err);
+        return {
+          threadId,
+          reply: "I tried to fetch extra information but something went wrong. Please try again later.",
+          botName,
+          assistantId,
+          botType: currentBotType
+        };
+      }
+  
+      // Keep polling — the run will now resume
+      continue;
+    }
+  
+    if (['expired', 'failed', 'cancelled'].includes(runStatus)) {
       console.error(`❌ Run ${run.id} ${runStatus}. Last status:`, status);
-      
-      // Try to get the last message even if the run expired
+  
+      // Try to get the last message even if the run failed
       try {
         const messages = await openai.beta.threads.messages.list(threadId);
         const lastAssistantMessage = messages.data.find(m => m.role === 'assistant');
@@ -281,9 +320,9 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
       } catch (err) {
         console.error('❌ Failed to retrieve last message:', err);
       }
-      
-      return { 
-        threadId, 
+  
+      return {
+        threadId,
         reply: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
         botName,
         assistantId,
@@ -291,7 +330,7 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
       };
     }
   }
-
+  
   if (attempts >= maxAttempts) {
     console.error(`❌ Run ${run.id} timed out after ${maxAttempts} seconds`);
     return { 

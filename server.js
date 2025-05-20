@@ -1,27 +1,29 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+
 const { handleChatMessage } = require('./openaiAssistant');
+const getUpcomingEvents = require('./functions/getUpcomingEvents');
+
+const { OpenAI } = require('openai');
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const app = express();
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const path = require('path');
-
-// Serve everything in /public (HTML, CSS, JS)
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- NEW: API Endpoint for Bot Configuration ---
+// --- BOT CONFIG ---
 app.get('/api/v1/bot-config', (req, res) => {
   try {
-    // Construct the map from environment variables
-    // IMPORTANT: Add keys here for *all* your bot types (e.g., 'mikes')
-    // and ensure corresponding BOT_NAME_... variables exist in .env
     const botNamesMap = {
-      default: process.env.BOT_NAME_DEFAULT || 'Mac', // Fallback if env var missing
-      candidate: process.env.BOT_NAME_CANDIDATE || 'Mike S', // Fallback
-      // mikes: process.env.BOT_NAME_MIKES || 'Mike S', // Keep this commented if Mike S is not one of the two
+      default: process.env.BOT_NAME_DEFAULT || 'Mac',
+      candidate: process.env.BOT_NAME_CANDIDATE || 'Mike S',
     };
-    console.log('Sending bot config:', botNamesMap); // Log for debugging
+    console.log('Sending bot config:', botNamesMap);
     res.json(botNamesMap);
   } catch (error) {
     console.error('Error fetching bot config:', error);
@@ -29,7 +31,7 @@ app.get('/api/v1/bot-config', (req, res) => {
   }
 });
 
-// Add endpoint to serve chatbot URL
+// --- CHATBOT URL ---
 app.get('/api/v1/chatbot-url', (req, res) => {
   try {
     const chatbotUrl = process.env.CHATBOT_URL || 'https://sandbox.preview3.co.uk';
@@ -40,13 +42,14 @@ app.get('/api/v1/chatbot-url', (req, res) => {
   }
 });
 
-// Add route for widget.js
-app.get("/widget.js", (req, res) => {
-  res.setHeader("Content-Type", "application/javascript");
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow any website to use the widget
-  res.sendFile(path.join(__dirname, "public", "widget.js"));
+// --- WIDGET JS ---
+app.get('/widget.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.sendFile(path.join(__dirname, 'public', 'widget.js'));
 });
 
+// --- CHAT ENTRY POINT ---
 app.post('/chat', async (req, res) => {
   const { message, threadId, chatDuration, botType } = req.body;
 
@@ -55,17 +58,57 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
-    const result = await handleChatMessage({ 
-      userMessage: message, 
+    const result = await handleChatMessage({
+      userMessage: message,
       threadId,
       chatDuration,
-      botType 
+      botType,
     });
-    console.log('Chat response:', result); // Debug log
     res.json(result);
   } catch (err) {
     console.error('Chat error:', err);
     res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// --- TOOL CALL HANDLER ---
+app.post('/api/v1/tool-call', async (req, res) => {
+  const { tool_call_id, function_name, arguments: args, run_id, thread_id } = req.body;
+
+  if (!tool_call_id || !function_name || !args || !run_id || !thread_id) {
+    return res.status(400).json({ error: 'Missing required tool call parameters' });
+  }
+
+  console.log(`🔧 Tool call received: ${function_name}`, { args });
+
+  try {
+    const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+
+    let output;
+    switch (function_name) {
+      case 'getUpcomingEvents':
+        output = await getUpcomingEvents(parsedArgs);
+        break;
+      default:
+        return res.status(400).json({ error: `Unknown function: ${function_name}` });
+    }
+
+    const toolOutput = {
+      tool_outputs: [
+        {
+          tool_call_id,
+          output: JSON.stringify(output)
+        }
+      ]
+    };
+
+    const response = await openai.beta.threads.runs.submitToolOutputs(thread_id, run_id, toolOutput);
+    console.log('✅ Tool output submitted:', response);
+    res.json(response);
+
+  } catch (err) {
+    console.error('❌ Tool handler error:', err);
+    res.status(500).json({ error: 'Failed to process tool call' });
   }
 });
 

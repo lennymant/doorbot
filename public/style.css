@@ -529,23 +529,30 @@ button:hover {
 }
 
 .tools-button {
-  background: var(--color-bot-bg);
+  margin-left: 0.625rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 1rem;
+  background-color: #e5e7eb;  /* Light grey color */
+  color: #666;  /* Darker grey for the icon */
   border: none;
-  border-radius: 4px;
-  padding: 8px;
+  border-radius: 0.375rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  height: 100%;  /* Match parent height */
+  min-height: 2.5rem;  /* Match send button height */
 }
 
 .tools-button:hover {
-  background: #d1d5db;
+  background-color: #d1d5db;  /* Slightly darker grey on hover */
 }
 
 .tools-button svg {
-  color: #666;
+  color: #666;  /* Darker grey for the icon */
+  width: 1rem;
+  height: 1rem;
 }
 
 .tools-menu {
@@ -558,6 +565,7 @@ button:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   min-width: 160px;
   z-index: 1000;
+  overflow: hidden;  /* Ensure hover states don't overflow rounded corners */
 }
 
 .tools-menu-item {
@@ -572,10 +580,13 @@ button:hover {
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin: 0;  /* Remove any default margins */
+  box-sizing: border-box;  /* Include padding in width calculation */
 }
 
 .tools-menu-item:hover {
   background: #f3f4f6;
+  width: 100%;  /* Ensure hover state covers full width */
 }
 
 .tools-menu-item span {
