@@ -146,7 +146,14 @@
       const optionContainers = document.querySelectorAll('.bot-option-container');
       optionContainers.forEach(container => container.remove());
 
-      addMessage("user", message);
+      // Get current time when message is sent
+      const messageTime = new Date().toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+
+      addMessage("user", message, messageTime);
       inputElement.value = "";
       sendMessage(message);
     }
@@ -305,8 +312,8 @@
     // Functions
     // ---------------------------
 
-    function addMessage(role, text, assistantId = null) {
-      console.log('Adding message:', { role, text, assistantId, TESTING_MODE }); // Debug log
+    function addMessage(role, text, timestamp = null, assistantId = null) {
+      console.log('Adding message:', { role, text, timestamp, assistantId, TESTING_MODE }); // Debug log
       const container = document.createElement("div");
       const isHidden = /^\[\[.*\]\]$/.test(text.trim());
       const matches = [...text.matchAll(/\{\{(.*?)\}\}/g)];
@@ -327,14 +334,14 @@
 
       // Add timestamp for user messages
       if (role === 'user') {
-        const timestamp = document.createElement("div");
-        timestamp.className = 'message-timestamp';
-        timestamp.textContent = new Date().toLocaleTimeString('en-GB', { 
+        const timestampDiv = document.createElement("div");
+        timestampDiv.className = 'message-timestamp';
+        timestampDiv.textContent = timestamp || new Date().toLocaleTimeString('en-GB', { 
           hour: '2-digit', 
           minute: '2-digit',
           hour12: false 
         });
-        div.appendChild(timestamp);
+        div.appendChild(timestampDiv);
       }
 
       // Add assistant ID in testing mode
