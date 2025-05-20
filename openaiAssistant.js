@@ -71,7 +71,7 @@ async function logThreadStart(threadId, source = 'website', botType = 'default')
     throw error;
   }
 }
-
+ 
 // Log a single message to the DB and handle [[END-CHAT]]
 async function logMessage(threadId, role, content, chatDuration) {
   console.log(`📝 Logging ${role} message to database:`, content);
