@@ -346,7 +346,7 @@ async function handleChatMessage({ userMessage, threadId, chatDuration, botType 
   const lastAssistantMessage = messages.data.find(m => m.role === 'assistant');
   const assistantReply = lastAssistantMessage?.content?.[0]?.text?.value || 'Sorry, I wasn\'t able to generate a response.';
 
-  console.log(`🤖 Assistant replied: ${assistantReply}`);
+  console.log(`🤖 Assistant replied...`);
   await logMessage(threadId, 'assistant', assistantReply, chatDuration);
 
   return { 

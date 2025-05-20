@@ -103,7 +103,7 @@ app.post('/api/v1/tool-call', async (req, res) => {
     };
 
     const response = await openai.beta.threads.runs.submitToolOutputs(thread_id, run_id, toolOutput);
-    console.log('✅ Tool output submitted:', response);
+    console.log('✅ Tool output submitted:');
     res.json(response);
 
   } catch (err) {
