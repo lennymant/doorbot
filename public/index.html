@@ -625,6 +625,49 @@
     document.getElementById("confirmNo").onclick = function() {
       modal.classList.add("hidden");
     };
+
+    // Function to create a new event
+    async function createEvent() {
+      const eventName = document.getElementById("eventName").value;
+      const eventDate = document.getElementById("eventDate").value;
+      const maxDays = parseInt(document.getElementById("maxDays").value);
+      const maxTickets = parseInt(document.getElementById("maxTickets").value);
+      const ticketPrice = parseFloat(document.getElementById("ticketPrice").value);
+      const eventType = document.getElementById("eventType").value;
+
+      if (!eventName || !eventDate || !maxDays || !maxTickets || !ticketPrice || !eventType) {
+        addMessage("bot", "Please fill in all fields");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/events", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: eventName,
+            date: eventDate,
+            maxDays,
+            maxTickets,
+            ticketPrice,
+            type: eventType,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create event");
+        }
+
+        const data = await response.json();
+        addMessage("bot", `Event created successfully! Event ID: ${data.id}`);
+        document.getElementById("eventForm").reset();
+      } catch (error) {
+        console.error("Error creating event:", error);
+        addMessage("bot", "Failed to create event. Please try again.");
+      }
+    }
   </script>
 </body>
 

@@ -112,5 +112,29 @@ app.post('/api/v1/tool-call', async (req, res) => {
   }
 });
 
+// Create a new event
+app.post("/api/events", (req, res) => {
+  const { name, date, maxDays, maxTickets, ticketPrice, type } = req.body;
+
+  // Validate required fields
+  if (!name || !date || !maxDays || !maxTickets || !ticketPrice || !type) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const event = {
+    id: Date.now().toString(),
+    name,
+    date,
+    maxDays,
+    maxTickets,
+    ticketPrice,
+    type,
+    tickets: [],
+  };
+
+  events.push(event);
+  res.status(201).json(event);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
